@@ -1,0 +1,20 @@
+= Push Notifications addon
+
+This addon adds Push Notifications capabilities to eXo mobile applications.
+
+== Installation
+
+At the root of an eXo Platform distribution, execute:
+
+`./addon install exo-push-notifications`
+
+== eXo Platform Compatibility
+
+[caption=""]
+|===
+|Addon Version |eXo Platform Version
+
+|1.0.x
+|4.4.0+
+
+|===
