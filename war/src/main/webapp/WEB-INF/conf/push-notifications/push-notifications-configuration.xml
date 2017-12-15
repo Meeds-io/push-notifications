@@ -35,6 +35,21 @@
         </component-plugin>
     </external-component-plugins>
 
+    <external-component-plugins>
+        <target-component>org.exoplatform.commons.api.notification.channel.ChannelManager</target-component>
+        <component-plugin>
+            <name>push.channel.social.template</name>
+            <set-method>registerTemplateProvider</set-method>
+            <type>org.exoplatform.push.channel.template.PushTemplateProvider</type>
+            <init-params>
+                <value-param>
+                    <name>channel-id</name>
+                    <value>PUSH_CHANNEL</value>
+                </value-param>
+            </init-params>
+        </component-plugin>
+    </external-component-plugins>
+
     <!-- TODO add resource bundle
     <external-component-plugins>
         <target-component>org.exoplatform.services.resources.ResourceBundleService</target-component>

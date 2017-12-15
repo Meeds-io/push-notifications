@@ -5,6 +5,7 @@ import org.exoplatform.commons.api.notification.channel.AbstractChannel;
 import org.exoplatform.commons.api.notification.channel.template.AbstractTemplateBuilder;
 import org.exoplatform.commons.api.notification.channel.template.TemplateProvider;
 import org.exoplatform.commons.api.notification.model.ChannelKey;
+import org.exoplatform.commons.api.notification.model.MessageInfo;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.push.domain.Device;
@@ -18,6 +19,8 @@ import org.exoplatform.services.log.Log;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.exoplatform.commons.notification.channel.WebChannel.MESSAGE_INFO;
 
 public class PushChannel extends AbstractChannel {
 
@@ -61,10 +64,16 @@ public class PushChannel extends AbstractChannel {
 
     devices.forEach(device -> {
       try {
-        LOG.info("Sending push notification to user {} (token={})", userId, device.getToken());
-        Message message = new Message(device.getToken(),
-                "eXo Platform", pluginId);
-        messagePublisher.send(message);
+        AbstractTemplateBuilder builder = getTemplateBuilder(ctx.getNotificationInfo().getKey());
+        if(builder != null) {
+          MessageInfo messageInfo = builder.buildMessage(ctx);
+          if (messageInfo != null) {
+            LOG.info("Sending push notification to user {} (token={}) with text \"{}\"",
+                    userId, device.getToken(), messageInfo.getBody());
+            Message message = new Message(device.getToken(), "eXo Platform", messageInfo.getBody());
+            messagePublisher.send(message);
+          }
+        }
       } catch (Exception e) {
         LOG.error("Cannot send push notification to user " + userId, e);
       }
@@ -78,7 +87,18 @@ public class PushChannel extends AbstractChannel {
   }
 
   @Override
+  public String getTemplateFilePath(PluginKey key) {
+    return this.templateFilePaths.get(key);
+  }
+
+  @Override
+  public boolean hasTemplateBuilder(PluginKey key) {
+    AbstractTemplateBuilder builder = this.templateBuilders.get(key);
+    return builder != null;
+  }
+
+  @Override
   protected AbstractTemplateBuilder getTemplateBuilderInChannel(PluginKey pluginKey) {
-    return this.templateBuilders.get(key);
+    return this.templateBuilders.get(pluginKey);
   }
 }

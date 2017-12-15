@@ -1,0 +1,6 @@
+<%
+  String message = (STATUS == "ACCEPTED")  ?
+          _ctx.appRes("Notification.intranet.message.accept.RelationshipReceivedRequestPlugin", USER)
+          : _ctx.appRes("Notification.intranet.message.RelationshipReceivedRequestPlugin", USER);
+%>
+<%=message%>
