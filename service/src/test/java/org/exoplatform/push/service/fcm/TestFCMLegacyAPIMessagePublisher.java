@@ -10,9 +10,8 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.io.InputStreamReader;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
 public class TestFCMLegacyAPIMessagePublisher {

@@ -11,7 +11,6 @@ import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.push.domain.Device;
 import org.exoplatform.push.domain.Message;
 import org.exoplatform.push.service.DeviceService;
-import org.exoplatform.push.service.fcm.FCMLegacyAPIMessagePublisher;
 import org.exoplatform.push.service.MessagePublisher;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -20,13 +19,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.exoplatform.commons.notification.channel.WebChannel.MESSAGE_INFO;
-
 public class PushChannel extends AbstractChannel {
 
   private static final Log LOG = ExoLogger.getLogger(PushChannel.class);
 
   public final static String ID = "PUSH_CHANNEL";
+
+  public static final String NOTIFICATION_TITLE = "eXo Platform";
 
   private final ChannelKey key = ChannelKey.key(ID);
 
@@ -62,22 +61,24 @@ public class PushChannel extends AbstractChannel {
 
     List<Device> devices = deviceService.getDevicesByUser(userId);
 
-    devices.forEach(device -> {
-      try {
-        AbstractTemplateBuilder builder = getTemplateBuilder(ctx.getNotificationInfo().getKey());
-        if(builder != null) {
-          MessageInfo messageInfo = builder.buildMessage(ctx);
-          if (messageInfo != null) {
-            LOG.info("Sending push notification to user {} (token={}) with text \"{}\"",
-                    userId, device.getToken(), messageInfo.getBody());
-            Message message = new Message(device.getToken(), "eXo Platform", messageInfo.getBody());
-            messagePublisher.send(message);
+    if(devices != null) {
+      devices.forEach(device -> {
+        try {
+          AbstractTemplateBuilder builder = getTemplateBuilder(ctx.getNotificationInfo().getKey());
+          if (builder != null) {
+            MessageInfo messageInfo = builder.buildMessage(ctx);
+            if (messageInfo != null) {
+              LOG.info("Sending push notification to user {} (token={}) with text \"{}\"",
+                      userId, device.getToken(), messageInfo.getBody());
+              Message message = new Message(device.getToken(), NOTIFICATION_TITLE, messageInfo.getBody());
+              messagePublisher.send(message);
+            }
           }
+        } catch (Exception e) {
+          LOG.error("Cannot send push notification to user " + userId, e);
         }
-      } catch (Exception e) {
-        LOG.error("Cannot send push notification to user " + userId, e);
-      }
-    });
+      });
+    }
   }
 
   @Override
