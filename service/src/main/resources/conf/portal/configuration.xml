@@ -22,11 +22,11 @@
 
   <component>
     <key>org.exoplatform.push.service.MessagePublisher</key>
-    <type>org.exoplatform.push.service.fcm.FCMLegacyAPIMessagePublisher</type>
+    <type>org.exoplatform.push.service.fcm.FCMMessagePublisher</type>
     <init-params>
       <value-param>
-        <name>serverKey</name>
-        <value>${exo.push.fcm.serverKey:}</value>
+        <name>serviceAccountFilePath</name>
+        <value>${exo.push.fcm.serviceAccountFilePath:fcm.json}</value>
       </value-param>
     </init-params>
   </component>
