@@ -19,6 +19,7 @@ import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
 import org.exoplatform.push.domain.Message;
 import org.exoplatform.push.service.MessagePublisher;
+import org.exoplatform.push.util.StringUtil;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
@@ -105,7 +106,7 @@ public class FCMMessagePublisher implements MessagePublisher {
             .append("      \"title\": \"").append(message.getTitle()).append("\",")
             .append("      \"body\": \"").append(message.getBody()).append("\"")
             .append("    },")
-            .append("    \"token\":\"").append(message.getReceiver()).append("\"")
+            .append("    \"token\":\"").append(message.getToken()).append("\"")
             .append("  }")
             .append("}")
             .toString();
@@ -118,6 +119,9 @@ public class FCMMessagePublisher implements MessagePublisher {
       } else if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
         throw new Exception("Error sending Push Notification, response is " + response.getStatusLine().getStatusCode()
                 + " - " + response.getStatusLine().getReasonPhrase());
+      } else {
+        LOG.info("Message sent to Firebase : username={}, token={}, type={}",
+                message.getReceiver(), StringUtil.mask(message.getToken(), 4), message.getDeviceType());
       }
     }
   }

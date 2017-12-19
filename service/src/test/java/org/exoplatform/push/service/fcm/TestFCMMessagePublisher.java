@@ -33,7 +33,7 @@ public class TestFCMMessagePublisher {
     FCMMessagePublisher messagePublisher = new FCMMessagePublisher(null, httpClient);
 
     // When
-    messagePublisher.send(new Message("", "", ""));
+    messagePublisher.send(new Message("", "", "", "", ""));
 
     // Then
     verify(httpClient, never()).execute(any());
@@ -47,7 +47,7 @@ public class TestFCMMessagePublisher {
     FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient);
 
     // When
-    messagePublisher.send(new Message("", "", ""));
+    messagePublisher.send(new Message("", "", "", "", ""));
 
     // Then
     verify(httpClient, never()).execute(any());
@@ -65,7 +65,7 @@ public class TestFCMMessagePublisher {
     FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient);
 
     // When
-    messagePublisher.send(new Message("", "", ""));
+    messagePublisher.send(new Message("", "", "", "", ""));
 
     // Then
     verify(httpClient, never()).execute(any());
@@ -98,7 +98,7 @@ public class TestFCMMessagePublisher {
     ArgumentCaptor<HttpPost> reqArgs = ArgumentCaptor.forClass(HttpPost.class);
 
     // When
-    messagePublisher.send(new Message("john", "My Notification Title", "My Notification Body"));
+    messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body"));
 
     // Then
     verify(httpClient, times(1)).execute(reqArgs.capture());
@@ -111,7 +111,7 @@ public class TestFCMMessagePublisher {
     JSONObject notification = message.getJSONObject("notification");
     assertEquals("My Notification Title", notification.getString("title"));
     assertEquals("My Notification Body", notification.getString("body"));
-    assertEquals("john", message.getString("token"));
+    assertEquals("token1", message.getString("token"));
   }
 
   @Test
@@ -142,7 +142,7 @@ public class TestFCMMessagePublisher {
 
     try {
       // When
-      messagePublisher.send(new Message("john", "My Notification Title", "My Notification Body"));
+      messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body"));
       fail("An exception must be thrown when FCM returns an error");
     } catch(Exception e) {
       // Then

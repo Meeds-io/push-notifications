@@ -12,6 +12,7 @@ import org.exoplatform.push.domain.Device;
 import org.exoplatform.push.domain.Message;
 import org.exoplatform.push.service.DeviceService;
 import org.exoplatform.push.service.MessagePublisher;
+import org.exoplatform.push.util.StringUtil;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
@@ -69,8 +70,8 @@ public class PushChannel extends AbstractChannel {
             MessageInfo messageInfo = builder.buildMessage(ctx);
             if (messageInfo != null) {
               LOG.info("Sending push notification to user {} (token={}) with text \"{}\"",
-                      userId, device.getToken(), messageInfo.getBody());
-              Message message = new Message(device.getToken(), NOTIFICATION_TITLE, messageInfo.getBody());
+                      userId, StringUtil.mask(device.getToken(), 4), messageInfo.getBody());
+              Message message = new Message(userId, device.getToken(), device.getType(), NOTIFICATION_TITLE, messageInfo.getBody());
               messagePublisher.send(message);
             }
           }

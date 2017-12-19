@@ -23,7 +23,7 @@ public class TestFCMLegacyAPIMessagePublisher {
     FCMLegacyAPIMessagePublisher messagePublisher = new FCMLegacyAPIMessagePublisher(null, httpClient);
 
     // When
-    messagePublisher.send(new Message("", "", ""));
+    messagePublisher.send(new Message("", "", "", "", ""));
 
     // Then
     verify(httpClient, never()).execute(any());
@@ -37,7 +37,7 @@ public class TestFCMLegacyAPIMessagePublisher {
     FCMLegacyAPIMessagePublisher messagePublisher = new FCMLegacyAPIMessagePublisher(initParams, httpClient);
 
     // When
-    messagePublisher.send(new Message("", "", ""));
+    messagePublisher.send(new Message("", "", "", "", ""));
 
     // Then
     verify(httpClient, never()).execute(any());
@@ -57,7 +57,7 @@ public class TestFCMLegacyAPIMessagePublisher {
     ArgumentCaptor<HttpPost> reqArgs = ArgumentCaptor.forClass(HttpPost.class);
 
     // When
-    messagePublisher.send(new Message("john", "My Notification Title", "My Notification Body"));
+    messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body"));
 
     // Then
     verify(httpClient, times(1)).execute(reqArgs.capture());
@@ -65,7 +65,7 @@ public class TestFCMLegacyAPIMessagePublisher {
     assertNotNull(httpUriRequest);
     String body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
     JSONObject jsonMessage = new JSONObject(body);
-    assertEquals("john", jsonMessage.getString("to"));
+    assertEquals("token1", jsonMessage.getString("to"));
     assertEquals("My Notification Title", jsonMessage.getJSONObject("notification").getString("title"));
     assertEquals("My Notification Body", jsonMessage.getJSONObject("notification").getString("body"));
 

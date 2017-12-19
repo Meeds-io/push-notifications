@@ -51,7 +51,7 @@ public class FCMLegacyAPIMessagePublisher implements MessagePublisher {
 
     String requestBody = new StringBuilder()
             .append("{")
-            .append("  \"to\":\"").append(message.getReceiver()).append("\",")
+            .append("  \"to\":\"").append(message.getToken()).append("\",")
             .append("  \"notification\": {")
             .append("    \"title\": \"").append(message.getTitle()).append("\",")
             .append("    \"body\": \"").append(message.getBody()).append("\"")
