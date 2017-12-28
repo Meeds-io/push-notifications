@@ -4,7 +4,9 @@ import org.exoplatform.commons.persistence.impl.GenericDAOJPAImpl;
 import org.exoplatform.push.domain.Device;
 
 import javax.persistence.NoResultException;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import java.util.Date;
 import java.util.List;
 
 public class DeviceDao extends GenericDAOJPAImpl<Device, Long> {
@@ -29,6 +31,12 @@ public class DeviceDao extends GenericDAOJPAImpl<Device, Long> {
     } catch (NoResultException e) {
       return null;
     }
+  }
+
+  public int deleteDevicesWithTokenOlderThan(Date expirationDate) {
+    Query query = getEntityManager().createNamedQuery("PushNotifsDevice.deleteDevicesWithTokenOlderThan");
+    query.setParameter("expirationDate", expirationDate);
+    return query.executeUpdate();
   }
 
 }

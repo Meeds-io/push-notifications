@@ -16,4 +16,6 @@ public interface DeviceService {
 
   Device getDeviceByToken(String token);
 
+  void deleteDevicesWithExpiredToken();
+
 }

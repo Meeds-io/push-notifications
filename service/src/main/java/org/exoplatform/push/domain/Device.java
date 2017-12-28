@@ -16,7 +16,12 @@ import java.util.Date;
   @NamedQuery(
     name = "PushNotifsDevice.findDevicesByToken",
     query = "SELECT d FROM PushNotifsDevice d WHERE d.token = :token"
+  ),
+  @NamedQuery(
+    name = "PushNotifsDevice.deleteDevicesWithTokenOlderThan",
+    query = "DELETE FROM PushNotifsDevice d WHERE d.registrationDate < :expirationDate"
   )
+
 })
 public class Device {
 

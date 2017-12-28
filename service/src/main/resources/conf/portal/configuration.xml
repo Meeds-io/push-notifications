@@ -14,6 +14,12 @@
   <component>
     <key>org.exoplatform.push.service.DeviceService</key>
     <type>org.exoplatform.push.service.DeviceServiceImpl</type>
+      <init-params>
+          <value-param>
+              <name>tokenExpirationTime</name>
+              <value>${exo.messaging.token.expiration.time:5184000}</value><!-- default 60 days -->
+          </value-param>
+      </init-params>
   </component>
 
   <component>
@@ -43,6 +49,29 @@
           <description>Change logs of push notifications management</description>
           <value>db/changelog/push-notifications.db.changelog-1.0.0.xml</value>
         </values-param>
+      </init-params>
+    </component-plugin>
+  </external-component-plugins>
+
+  <external-component-plugins>
+    <target-component>org.exoplatform.services.scheduler.JobSchedulerService</target-component>
+    <component-plugin>
+      <name>ExpiredTokensCleanerJob</name>
+      <set-method>addPeriodJob</set-method>
+      <type>org.exoplatform.services.scheduler.PeriodJob</type>
+      <description>Init job for messaging token cleaning</description>
+      <init-params>
+        <properties-param>
+          <name>job.info</name>
+          <description>details of the execution of the bulk indexing job</description>
+          <property name="jobName" value="ExpiredMessagingTokensCleaner"/>
+          <property name="groupName" value="Messaging"/>
+          <property name="job" value="org.exoplatform.push.job.ExpiredTokensCleanerJob"/>
+          <property name="repeatCount" value="0"/>
+          <property name="period" value="${exo.messaging.token.cleaner.job.period:86400000}"/>
+          <property name="startTime" value="+60000"/><!-- start after 1 minute delay -->
+          <property name="endTime" value=""/>
+        </properties-param>
       </init-params>
     </component-plugin>
   </external-component-plugins>
