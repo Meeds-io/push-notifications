@@ -30,9 +30,8 @@
             <column name="TYPE" type="NVARCHAR(200)">
                 <constraints nullable="true"/>
             </column>
-            <column name="REGISTRATION_DATE" type="TIMESTAMP" defaultValue="${now}">
-                <!-- TODO should be set to false -->
-                <constraints nullable="true"/>
+            <column name="REGISTRATION_DATE" type="TIMESTAMP" defaultValueComputed="${now}">
+                <constraints nullable="false"/>
             </column>
         </createTable>
         <modifySql dbms="mysql">

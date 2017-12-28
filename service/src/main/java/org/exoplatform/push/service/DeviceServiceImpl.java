@@ -39,6 +39,9 @@ public class DeviceServiceImpl implements DeviceService {
   }
 
   public void createDevice(Device device) {
+    if(device.getRegistrationDate() == null) {
+      device.setRegistrationDate(new Date());
+    }
     deviceDao.create(device);
     LOG.info("New device registered : username={}, token={}, type={}", device.getUsername(), StringUtil.mask(device.getToken(), 4), device.getType());
   }
