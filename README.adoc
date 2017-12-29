@@ -53,6 +53,13 @@ eXo Platform needs to know which Firebase project to send notifications to and w
 * save the JSON file in the file gatein/conf/fcm.json of your eXo Platform instance (this is the default
 location for this file, but it can be changed via the parameter `exo.push.fcm.serviceAccountFilePath` in exo.properties)
 
+The following options can also be configured in exo.properties:
+
+* *exo.push.fcm.message.expirationTime* : how long (in seconds) the message should be kept in FCM storage
+if the device is offline - defaults to the default value of FCM
+* *exo.messaging.token.expirationTime* : how long (in seconds) an inactive token is kept in the database before
+being deleted
+
 == Usage
 
 You can now start your eXo Platform instance. Once started:
