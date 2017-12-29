@@ -21,7 +21,6 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="PK_MSG_DEVICES" />
             </column>
             <column name="TOKEN" type="NVARCHAR(200)">
-                <!-- TODO add an unicity constraint on tokens -->
                 <constraints nullable="false"/>
             </column>
             <column name="USERNAME" type="NVARCHAR(200)">
@@ -38,7 +37,12 @@
             <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
         </modifySql>
     </changeSet>
-    <changeSet author="push-notifications" id="1.0.0-2" dbms="oracle,postgresql">
+    <changeSet author="push-notifications" id="1.0.0-2">
+        <addUniqueConstraint columnNames="TOKEN"
+                             constraintName="UK_MSG_DEVICES_TOKEN_01"
+                             tableName="MSG_DEVICES"/>
+    </changeSet>
+    <changeSet author="push-notifications" id="1.0.0-3" dbms="oracle,postgresql">
         <createSequence sequenceName="SEQ_MSG_DEVICES_ID" startValue="1"/>
     </changeSet>
 
