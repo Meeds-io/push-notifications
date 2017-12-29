@@ -17,7 +17,7 @@
       <init-params>
           <value-param>
               <name>tokenExpirationTime</name>
-              <value>${exo.messaging.token.expiration.time:5184000}</value><!-- default 60 days -->
+              <value>${exo.messaging.token.expirationTime:5184000}</value><!-- default 60 days -->
           </value-param>
       </init-params>
   </component>
