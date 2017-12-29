@@ -19,9 +19,7 @@ import org.mockito.ArgumentCaptor;
 import java.io.IOException;
 import java.security.PrivateKey;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class TestFCMMessagePublisher {
@@ -112,6 +110,8 @@ public class TestFCMMessagePublisher {
     assertEquals("My Notification Title", notification.getString("title"));
     assertEquals("My Notification Body", notification.getString("body"));
     assertEquals("token1", message.getString("token"));
+    assertFalse(message.has("android"));
+    assertFalse(message.has("ios"));
   }
 
   @Test
@@ -149,5 +149,55 @@ public class TestFCMMessagePublisher {
       verify(httpClient, times(1)).execute(reqArgs.capture());
       assertEquals("Error sending Push Notification, response is 401 - Not Authorized", e.getMessage());
     }
+  }
+
+  @Test
+  public void shouldSendMessageWithTTLWhenConfigFileExistsAndResponseOK() throws Exception {
+    // Given
+    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
+    CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
+    when(httpResponse.getStatusLine()).thenReturn(
+            new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_OK, ""));
+    when(httpClient.execute(any())).thenReturn(httpResponse);
+    InitParams initParams = new InitParams();
+    ValueParam serverKeyParam = new ValueParam();
+    serverKeyParam.setName("serviceAccountFilePath");
+    serverKeyParam.setValue(this.getClass().getResource("/fcm-test.json").getPath());
+    initParams.addParameter(serverKeyParam);
+    ValueParam messageExpirationTimeParam = new ValueParam();
+    messageExpirationTimeParam.setName("messageExpirationTime");
+    messageExpirationTimeParam.setValue("60");
+    initParams.addParameter(messageExpirationTimeParam);
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
+      @Override
+      protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
+        return mock(PrivateKey.class);
+      }
+      @Override
+      protected String getAccessToken() throws IOException {
+        return "fakeAccessToken";
+      }
+    };
+
+    ArgumentCaptor<HttpPost> reqArgs = ArgumentCaptor.forClass(HttpPost.class);
+
+    // When
+    messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body"));
+
+    // Then
+    verify(httpClient, times(1)).execute(reqArgs.capture());
+    HttpPost httpUriRequest = reqArgs.getValue();
+    assertNotNull(httpUriRequest);
+    String body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
+    JSONObject jsonMessage = new JSONObject(body);
+    assertEquals(false, jsonMessage.getBoolean("validate_only"));
+    JSONObject message = jsonMessage.getJSONObject("message");
+    JSONObject notification = message.getJSONObject("notification");
+    assertEquals("My Notification Title", notification.getString("title"));
+    assertEquals("My Notification Body", notification.getString("body"));
+    assertEquals("token1", message.getString("token"));
+    JSONObject android = message.getJSONObject("android");
+    assertEquals("60s", android.getString("ttl"));
+    assertFalse(message.has("ios"));
   }
 }

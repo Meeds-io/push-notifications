@@ -21,6 +21,9 @@ public class FCMLegacyAPIMessagePublisher implements MessagePublisher {
 
   private String serverKey = null;
 
+  // How long (in seconds) the message should be kept in FCM storage if the device is offline
+  private Integer fcmMessageExpirationTime = null;
+
   public FCMLegacyAPIMessagePublisher(InitParams initParams) {
     this(initParams, HttpClientBuilder.create().build());
   }
@@ -31,9 +34,20 @@ public class FCMLegacyAPIMessagePublisher implements MessagePublisher {
       if(serverKeyValueParam != null) {
         serverKey = serverKeyValueParam.getValue();
       }
-    }
-    if(StringUtils.isBlank(serverKey)) {
-      LOG.error("Push notifications - Firebase Cloud Messaging serverKey is mandatory, please configure it with exo.push.fcm.serverKey property.");
+      if(StringUtils.isBlank(serverKey)) {
+        LOG.error("Push notifications - Firebase Cloud Messaging serverKey is mandatory, please configure it with exo.push.fcm.serverKey property.");
+      }
+
+      // FCM message expiration
+      ValueParam fcmMessageExpirationTimeValueParam = initParams.getValueParam("messageExpirationTime");
+      if(fcmMessageExpirationTimeValueParam != null && StringUtils.isNotBlank(fcmMessageExpirationTimeValueParam.getValue())) {
+        try {
+          fcmMessageExpirationTime = Integer.parseInt(fcmMessageExpirationTimeValueParam.getValue());
+        } catch (NumberFormatException e) {
+          LOG.error("Push Notifications - FCM message expiration time is not a valid number ("
+                  + fcmMessageExpirationTimeValueParam.getValue() + "), using default value from FCM", e);
+        }
+      }
     }
 
     this.httpClient = httpClient;
@@ -49,17 +63,20 @@ public class FCMLegacyAPIMessagePublisher implements MessagePublisher {
     post.setHeader(HttpHeaders.AUTHORIZATION, "key=" + serverKey);
     post.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
 
-    String requestBody = new StringBuilder()
+    StringBuilder requestBody = new StringBuilder()
             .append("{")
-            .append("  \"to\":\"").append(message.getToken()).append("\",")
-            .append("  \"notification\": {")
+            .append("  \"to\":\"").append(message.getToken()).append("\",");
+    if(fcmMessageExpirationTime != null) {
+      requestBody.append("  \"time_to_live\":\"").append(fcmMessageExpirationTime).append("\",");
+    }
+    requestBody.append("  \"notification\": {")
             .append("    \"title\": \"").append(message.getTitle()).append("\",")
             .append("    \"body\": \"").append(message.getBody()).append("\"")
             .append("  }")
             .append("}")
             .toString();
 
-    post.setEntity(new ByteArrayEntity(requestBody.getBytes()));
+    post.setEntity(new ByteArrayEntity(requestBody.toString().getBytes()));
 
     httpClient.execute(post);
   }

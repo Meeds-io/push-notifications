@@ -34,6 +34,10 @@
         <name>serviceAccountFilePath</name>
         <value>${exo.push.fcm.serviceAccountFilePath:fcm.json}</value>
       </value-param>
+      <value-param>
+        <name>messageExpirationTime</name>
+        <value>${exo.push.fcm.message.expirationTime:}</value>
+      </value-param>
     </init-params>
   </component>
 

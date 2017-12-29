@@ -31,6 +31,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 
 /**
@@ -48,40 +50,55 @@ public class FCMMessagePublisher implements MessagePublisher {
 
   private GoogleCredential googleCredential;
 
+  // How long (in seconds) the message should be kept in FCM storage if the device is offline
+  private Integer fcmMessageExpirationTime = null;
+
   public FCMMessagePublisher(InitParams initParams) {
     this(initParams, HttpClientBuilder.create().build());
   }
 
   public FCMMessagePublisher(InitParams initParams, CloseableHttpClient httpClient) {
     if(initParams != null) {
+      // FCM configuration file
       ValueParam serviceAccountFilePathValueParam = initParams.getValueParam("serviceAccountFilePath");
       if(serviceAccountFilePathValueParam != null) {
         fcmServiceAccountFilePath = serviceAccountFilePathValueParam.getValue();
       }
-    }
-    if(StringUtils.isNotBlank(fcmServiceAccountFilePath)) {
-      try {
-        if (!fcmServiceAccountFilePath.startsWith("/")) {
-          // relative path
-          String gateinConfDir = System.getProperty("gatein.conf.dir");
-          fcmServiceAccountFilePath = gateinConfDir + "/" + fcmServiceAccountFilePath;
+      if(StringUtils.isNotBlank(fcmServiceAccountFilePath)) {
+        try {
+          if (!fcmServiceAccountFilePath.startsWith("/")) {
+            // relative path
+            String gateinConfDir = System.getProperty("gatein.conf.dir");
+            fcmServiceAccountFilePath = gateinConfDir + "/" + fcmServiceAccountFilePath;
+          }
+
+          fcmServiceAccountConfiguration = loadConfiguration(fcmServiceAccountFilePath);
+
+          googleCredential = getCredentialsFromStream(fcmServiceAccountConfiguration);
+
+        } catch (FileNotFoundException e) {
+          LOG.error("Push notifications - Firebase Cloud Messaging service account config file is mandatory, " +
+                  "please add it at " + fcmServiceAccountFilePath);
+        } catch (GeneralSecurityException | IOException e) {
+          LOG.error("Push notifications - Error while loading Firebase Cloud Messaging configuration from config file "
+                  + fcmServiceAccountFilePath, e);
         }
+      } else {
+        LOG.error("Push notifications - Firebase Cloud Messaging service account config file path is mandatory, " +
+                "please configure it with exo.push.fcm.serviceAccountFilePath property.");
 
-        fcmServiceAccountConfiguration = loadConfiguration(fcmServiceAccountFilePath);
-
-        googleCredential = getCredentialsFromStream(fcmServiceAccountConfiguration);
-
-      } catch (FileNotFoundException e) {
-        LOG.error("Push notifications - Firebase Cloud Messaging service account config file is mandatory, " +
-                "please add it at " + fcmServiceAccountFilePath);
-      } catch (GeneralSecurityException | IOException e) {
-        LOG.error("Push notifications - Error while loading Firebase Cloud Messaging configuration from config file "
-                + fcmServiceAccountFilePath, e);
       }
-    } else {
-      LOG.error("Push notifications - Firebase Cloud Messaging service account config file path is mandatory, " +
-              "please configure it with exo.push.fcm.serviceAccountFilePath property.");
 
+      // FCM message expiration
+      ValueParam fcmMessageExpirationTimeValueParam = initParams.getValueParam("messageExpirationTime");
+      if(fcmMessageExpirationTimeValueParam != null && StringUtils.isNotBlank(fcmMessageExpirationTimeValueParam.getValue())) {
+        try {
+          fcmMessageExpirationTime = Integer.parseInt(fcmMessageExpirationTimeValueParam.getValue());
+        } catch (NumberFormatException e) {
+          LOG.error("Push Notifications - FCM message expiration time is not a valid number ("
+                  + fcmMessageExpirationTimeValueParam.getValue() + "), using default value from FCM", e);
+        }
+      }
     }
 
     this.httpClient = httpClient;
@@ -98,20 +115,35 @@ public class FCMMessagePublisher implements MessagePublisher {
     post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken());
     post.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
 
-    String requestBody = new StringBuilder()
+    StringBuilder requestBody = new StringBuilder()
             .append("{")
             .append("  \"validate_only\": false,")
             .append("  \"message\": {")
             .append("    \"notification\": {")
             .append("      \"title\": \"").append(message.getTitle()).append("\",")
             .append("      \"body\": \"").append(message.getBody()).append("\"")
-            .append("    },")
-            .append("    \"token\":\"").append(message.getToken()).append("\"")
+            .append("    },");
+    if(fcmMessageExpirationTime != null && StringUtils.isNotBlank(message.getDeviceType())) {
+      if(message.getDeviceType().equals("android")) {
+        requestBody
+                .append("    \"android\": {")
+                .append("      \"ttl\": \"").append(fcmMessageExpirationTime).append("s\"")
+                .append("    },");
+      } else if(message.getDeviceType().equals("ios")) {
+        Instant expirationInstant = Instant.now().minus(fcmMessageExpirationTime, ChronoUnit.SECONDS);
+        requestBody
+                .append("    \"apns\": {")
+                .append("      \"headers\": {")
+                .append("        \"apns-expiration\": \"").append(expirationInstant.getEpochSecond()).append("\"")
+                .append("      },")
+                .append("    },");
+      }
+    }
+    requestBody.append("    \"token\":\"").append(message.getToken()).append("\"")
             .append("  }")
-            .append("}")
-            .toString();
+            .append("}");
 
-    post.setEntity(new ByteArrayEntity(requestBody.getBytes()));
+    post.setEntity(new ByteArrayEntity(requestBody.toString().getBytes()));
 
     try(CloseableHttpResponse response = httpClient.execute(post)) {
       if (response == null || response.getStatusLine() == null) {
