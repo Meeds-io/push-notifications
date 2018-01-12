@@ -40,7 +40,9 @@ The Firebase Cloud Messaging API must be enabled in order to be able to use it:
 
 * go to the https://console.developers.google.com[Google Developer console]
 * select your Firebase project
-* click on *Firebase Cloud Messaging API*
+* click on *Enable APIs and Services*
+* search for "firebase cloud messaging"
+* click on the item *Firbase Cloud Messaging API*
 * click on *Enable*
 
 ==== eXo Platform
@@ -104,7 +106,7 @@ image::doc/firebase-sample-mobile-app.png[,362,638,align="center"]
 curl \
     -H "Content-Type: application/json" \
     --user root:gtn \
-    -X POST -d '{"token": "<my-token>", "username": "<my-username>", "device": "android"}' \
+    -X POST -d '{"token": "<my-token>", "username": "<my-username>", "type": "android"}' \
     http://localhost:8080/rest/private/v1/messaging/device
 ----
 
