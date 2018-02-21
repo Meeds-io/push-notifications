@@ -61,6 +61,7 @@ The following options can also be configured in exo.properties:
 if the device is offline - defaults to the default value of FCM
 * *exo.messaging.token.expirationTime* : how long (in seconds) an inactive token is kept in the database before
 being deleted
+* *exo.notification.portalname* : title of the push notifications (also used for mail notifications)
 
 == Usage
 

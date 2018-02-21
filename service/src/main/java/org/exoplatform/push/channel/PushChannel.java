@@ -26,7 +26,7 @@ public class PushChannel extends AbstractChannel {
 
   public final static String ID = "PUSH_CHANNEL";
 
-  public static final String NOTIFICATION_TITLE = "eXo Platform";
+  public String notificationTitle;
 
   private final ChannelKey key = ChannelKey.key(ID);
 
@@ -41,6 +41,8 @@ public class PushChannel extends AbstractChannel {
   public PushChannel(MessagePublisher messagePublisher, DeviceService deviceService) {
     this.messagePublisher = messagePublisher;
     this.deviceService = deviceService;
+
+    this.notificationTitle = System.getProperty("exo.notifications.portalname");
   }
 
   @Override
@@ -71,7 +73,7 @@ public class PushChannel extends AbstractChannel {
             if (messageInfo != null) {
               LOG.info("Sending push notification to user {} (token={}) with text \"{}\"",
                       userId, StringUtil.mask(device.getToken(), 4), messageInfo.getBody());
-              Message message = new Message(userId, device.getToken(), device.getType(), NOTIFICATION_TITLE, messageInfo.getBody());
+              Message message = new Message(userId, device.getToken(), device.getType(), notificationTitle, messageInfo.getBody());
               messagePublisher.send(message);
             }
           }
