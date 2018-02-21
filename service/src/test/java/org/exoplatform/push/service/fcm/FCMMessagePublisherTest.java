@@ -22,7 +22,7 @@ import java.security.PrivateKey;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-public class TestFCMMessagePublisher {
+public class FCMMessagePublisherTest {
 
   @Test
   public void shouldNotSendMessageWhenInitParamsAreNull() throws Exception {

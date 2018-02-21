@@ -15,7 +15,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.*;
 
-public class TestFCMLegacyAPIMessagePublisher {
+public class FCMLegacyAPIMessagePublisherTest {
 
   @Test
   public void shouldNotSendMessageWhenInitParamsAreNull() throws Exception {
