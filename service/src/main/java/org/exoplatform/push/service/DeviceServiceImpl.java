@@ -38,12 +38,24 @@ public class DeviceServiceImpl implements DeviceService {
     this.deviceDao = deviceDao;
   }
 
-  public void createDevice(Device device) {
+  public void saveDevice(Device device) {
     if(device.getRegistrationDate() == null) {
       device.setRegistrationDate(new Date());
     }
-    deviceDao.create(device);
-    LOG.info("New device registered : username={}, token={}, type={}", device.getUsername(), StringUtil.mask(device.getToken(), 4), device.getType());
+    Device existingDevice = getDeviceByToken(device.getToken());
+    if(existingDevice != null) {
+      if(device.getUsername().equals(existingDevice.getUsername())) {
+        existingDevice.setType(device.getType());
+        existingDevice.setRegistrationDate(device.getRegistrationDate());
+        deviceDao.update(existingDevice);
+        LOG.info("Device updated : username={}, token={}, type={}", device.getUsername(), StringUtil.mask(device.getToken(), 4), device.getType());
+      } else {
+        throw new RuntimeException("Token already registered for another user !");
+      }
+    } else {
+      deviceDao.create(device);
+      LOG.info("New device registered : username={}, token={}, type={}", device.getUsername(), StringUtil.mask(device.getToken(), 4), device.getType());
+    }
   }
 
   public void deleteDevice(Device device) {

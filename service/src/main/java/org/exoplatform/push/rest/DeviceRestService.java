@@ -7,7 +7,6 @@ import org.exoplatform.push.domain.Device;
 import org.exoplatform.push.service.DeviceService;
 import org.exoplatform.services.rest.resource.ResourceContainer;
 import org.exoplatform.services.security.ConversationState;
-import org.exoplatform.social.service.rest.api.VersionResources;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -67,16 +66,16 @@ public class DeviceRestService implements ResourceContainer {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @RolesAllowed("users")
-  @ApiOperation(value = "Creates a device",
+  @ApiOperation(value = "Creates or updates a device",
           httpMethod = "POST",
           response = Response.class,
-          notes = "This creates the device in the following cases: <br/><ul><li>the owner of the device is the authenticated user</li><li>the authenticated user is the super user</li></ul>")
+          notes = "This creates or updates the device in the following cases: <br/><ul><li>the owner of the device is the authenticated user</li><li>the authenticated user is the super user</li></ul>")
   @ApiResponses(value = {
           @ApiResponse(code = 200, message = "Device created"),
           @ApiResponse (code = 400, message = "Invalid query input"),
           @ApiResponse (code = 401, message = "Not authorized to create the device"),
           @ApiResponse (code = 500, message = "Internal server error")})
-  public Response createDevice(@ApiParam(value = "Device", required = true) Device device) {
+  public Response saveDevice(@ApiParam(value = "Device", required = true) Device device) {
     if(device == null || StringUtils.isBlank(device.getToken()) || StringUtils.isBlank(device.getUsername())) {
       throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
@@ -91,7 +90,7 @@ public class DeviceRestService implements ResourceContainer {
       throw new WebApplicationException(Response.Status.UNAUTHORIZED);
     }
 
-    deviceService.createDevice(device);
+    deviceService.saveDevice(device);
 
     return Response.ok().build();
   }
