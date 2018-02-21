@@ -61,7 +61,7 @@ public class DeviceRestService implements ResourceContainer {
       throw new WebApplicationException(Response.Status.UNAUTHORIZED);
     }
 
-    return Response.ok(device).build();
+    return Response.ok(device, MediaType.APPLICATION_JSON_TYPE).build();
   }
 
   @POST
