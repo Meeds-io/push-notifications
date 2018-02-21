@@ -38,6 +38,7 @@ public class DeviceServiceImpl implements DeviceService {
     this.deviceDao = deviceDao;
   }
 
+  @ExoTransactional
   public void saveDevice(Device device) {
     if(device.getRegistrationDate() == null) {
       device.setRegistrationDate(new Date());
@@ -58,6 +59,7 @@ public class DeviceServiceImpl implements DeviceService {
     }
   }
 
+  @ExoTransactional
   public void deleteDevice(Device device) {
     deviceDao.delete(device);
     LOG.info("Device unregistered : username={}, token={}, type={}", device.getUsername(), StringUtil.mask(device.getToken(), 4), device.getType());
