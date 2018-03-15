@@ -33,7 +33,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Message publisher using the HTTP API v1 of Firebase Cloud Messaging
@@ -79,7 +80,7 @@ public class FCMMessagePublisher implements MessagePublisher {
         } catch (FileNotFoundException e) {
           LOG.error("Push notifications - Firebase Cloud Messaging service account config file is mandatory, " +
                   "please add it at " + fcmServiceAccountFilePath);
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (Exception e) {
           LOG.error("Push notifications - Error while loading Firebase Cloud Messaging configuration from config file "
                   + fcmServiceAccountFilePath, e);
         }
@@ -213,14 +214,31 @@ public class FCMMessagePublisher implements MessagePublisher {
    * @throws IOException
    * @throws GeneralSecurityException
    */
-  protected GoogleCredential getCredentialsFromStream(FCMServiceAccountConfiguration configuration) throws IOException, GeneralSecurityException {
+  protected GoogleCredential getCredentialsFromStream(FCMServiceAccountConfiguration configuration) throws Exception {
     PrivateKey privateKey = getPrivateKeyFromPkcs8(configuration.getServiceAccountPrivateKeyPem());
     GoogleCredential.Builder credentialBuilder = (new GoogleCredential.Builder())
             .setTransport(GoogleNetHttpTransport.newTrustedTransport())
             .setJsonFactory(new JacksonFactory())
             .setServiceAccountId(configuration.getServiceAccountId())
-            .setServiceAccountScopes(Arrays.asList("https://www.googleapis.com/auth/firebase.messaging"))
             .setServiceAccountPrivateKey(privateKey);
+
+    // Workaround to call credentialBuilder.setServiceAccountScopes method with both signatures (with argument Iterable
+    // and Collection) to support multiple versions of Google API (at least 14 and 17).
+    // To be removed when old signature not supported anymore.
+    java.lang.reflect.Method setServiceAccountScopesMethod;
+    try {
+      setServiceAccountScopesMethod = credentialBuilder.getClass().getDeclaredMethod("setServiceAccountScopes", Iterable.class);
+    } catch (NoSuchMethodException e) {
+      try {
+        setServiceAccountScopesMethod = credentialBuilder.getClass().getDeclaredMethod("setServiceAccountScopes", Collection.class);
+      } catch (NoSuchMethodException e1) {
+        throw new Exception("Cannot find suitable method setServiceAccountScopes in GoogleCredential.Builder class", e1);
+      }
+    }
+
+    if(setServiceAccountScopesMethod != null) {
+      setServiceAccountScopesMethod.invoke(credentialBuilder, Collections.singletonList("https://www.googleapis.com/auth/firebase.messaging"));
+    }
 
     return credentialBuilder.build();
   }
