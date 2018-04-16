@@ -1,1 +1,2 @@
 <%=_ctx.appRes("Notification.intranet.message.ActivityMentionPlugin", USER)%>
+$ACTIVITY

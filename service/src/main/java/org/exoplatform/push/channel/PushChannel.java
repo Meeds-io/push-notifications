@@ -71,8 +71,8 @@ public class PushChannel extends AbstractChannel {
           if (builder != null) {
             MessageInfo messageInfo = builder.buildMessage(ctx);
             if (messageInfo != null) {
-              LOG.info("Sending push notification to user {} (token={}) with text \"{}\"",
-                      userId, StringUtil.mask(device.getToken(), 4), messageInfo.getBody());
+              LOG.info("Sending push notification to user {} (token={})",
+                      userId, StringUtil.mask(device.getToken(), 4));
               Message message = new Message(userId, device.getToken(), device.getType(), notificationTitle, messageInfo.getBody());
               messagePublisher.send(message);
             }

@@ -1,11 +1,12 @@
 <%
-  String message = "";
-  if (NB_USERS > 2) {
-    message = _ctx.appRes("Notification.intranet.message.more.ActivityCommentPlugin", USER, LAST_USER, ""+COUNT);
-  } else if (NB_USERS == 2) {
-    message = _ctx.appRes("Notification.intranet.message.two.ActivityCommentPlugin", USER, LAST_USER);
-  } else {
-    message = _ctx.appRes("Notification.intranet.message.one.ActivityCommentPlugin", USER);
-  }
+ String message = "";
+ if (NB_USERS > 2) {
+   message = _ctx.appRes("Notification.intranet.message.more.ActivityCommentPlugin", USER, LAST_USER, ""+COUNT);
+ } else if (NB_USERS == 2) {
+   message = _ctx.appRes("Notification.intranet.message.two.ActivityCommentPlugin", USER, LAST_USER);
+ } else {
+   message = _ctx.appRes("Notification.intranet.message.one.ActivityCommentPlugin", USER);
+ }
 %>
-<%= message %>
+$message
+$COMMENT

@@ -3,4 +3,4 @@
           _ctx.appRes("Notification.intranet.message.accept.RequestJoinSpacePlugin", USER, SPACE)
           : _ctx.appRes("Notification.intranet.message.RequestJoinSpacePlugin", USER, SPACE);
 %>
-<%=message%>
+$message

@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.io.IOException;
 import java.security.PrivateKey;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -97,21 +98,38 @@ public class FCMMessagePublisherTest {
 
     // When
     messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body"));
+    messagePublisher.send(new Message("mary", "token2", "ios", "My Notification Title", "My Notification Body"));
 
     // Then
-    verify(httpClient, times(1)).execute(reqArgs.capture());
-    HttpPost httpUriRequest = reqArgs.getValue();
-    assertNotNull(httpUriRequest);
+    verify(httpClient, times(2)).execute(reqArgs.capture());
+
+    List<HttpPost> httpUriRequests = reqArgs.getAllValues();
+    assertNotNull(httpUriRequests);
+
+    HttpPost httpUriRequest = httpUriRequests.get(0);
     String body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
     JSONObject jsonMessage = new JSONObject(body);
     assertEquals(false, jsonMessage.getBoolean("validate_only"));
     JSONObject message = jsonMessage.getJSONObject("message");
-    JSONObject notification = message.getJSONObject("notification");
+    JSONObject notification = message.getJSONObject("data");
     assertEquals("My Notification Title", notification.getString("title"));
     assertEquals("My Notification Body", notification.getString("body"));
     assertEquals("token1", message.getString("token"));
     assertFalse(message.has("android"));
     assertFalse(message.has("ios"));
+
+    httpUriRequest = httpUriRequests.get(1);
+    assertNotNull(httpUriRequest);
+    body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
+    jsonMessage = new JSONObject(body);
+    assertEquals(false, jsonMessage.getBoolean("validate_only"));
+    message = jsonMessage.getJSONObject("message");
+    notification = message.getJSONObject("notification");
+    assertEquals("My Notification Title", notification.getString("title"));
+    assertEquals("My Notification Body", notification.getString("body"));
+    assertEquals("token2", message.getString("token"));
+    assertFalse(message.has("android"));
+    assertFalse(message.has("apns"));
   }
 
   @Test
@@ -183,20 +201,37 @@ public class FCMMessagePublisherTest {
 
     // When
     messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body"));
+    messagePublisher.send(new Message("mary", "token2", "ios", "My Notification Title", "My Notification Body"));
 
     // Then
-    verify(httpClient, times(1)).execute(reqArgs.capture());
-    HttpPost httpUriRequest = reqArgs.getValue();
-    assertNotNull(httpUriRequest);
+    verify(httpClient, times(2)).execute(reqArgs.capture());
+
+    List<HttpPost> httpUriRequests = reqArgs.getAllValues();
+    assertNotNull(httpUriRequests);
+    HttpPost httpUriRequest = httpUriRequests.get(0);
     String body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
     JSONObject jsonMessage = new JSONObject(body);
     assertEquals(false, jsonMessage.getBoolean("validate_only"));
     JSONObject message = jsonMessage.getJSONObject("message");
-    JSONObject notification = message.getJSONObject("notification");
+    JSONObject notification = message.getJSONObject("data");
     assertEquals("My Notification Title", notification.getString("title"));
     assertEquals("My Notification Body", notification.getString("body"));
     assertEquals("token1", message.getString("token"));
     JSONObject android = message.getJSONObject("android");
+    assertEquals("60s", android.getString("ttl"));
+    assertFalse(message.has("ios"));
+
+    httpUriRequest = httpUriRequests.get(1);
+    assertNotNull(httpUriRequest);
+    body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
+    jsonMessage = new JSONObject(body);
+    assertEquals(false, jsonMessage.getBoolean("validate_only"));
+    message = jsonMessage.getJSONObject("message");
+    notification = message.getJSONObject("notification");
+    assertEquals("My Notification Title", notification.getString("title"));
+    assertEquals("My Notification Body", notification.getString("body"));
+    assertEquals("token2", message.getString("token"));
+    JSONObject ios = message.getJSONObject("apns");
     assertEquals("60s", android.getString("ttl"));
     assertFalse(message.has("ios"));
   }

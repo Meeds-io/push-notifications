@@ -3,4 +3,4 @@
           _ctx.appRes("Notification.intranet.message.accept.SpaceInvitationPlugin", SPACE)
           : _ctx.appRes("Notification.intranet.message.SpaceInvitationPlugin", SPACE);
 %>
-<%=message%>
+$message

@@ -119,10 +119,15 @@ public class FCMMessagePublisher implements MessagePublisher {
     StringBuilder requestBody = new StringBuilder()
             .append("{")
             .append("  \"validate_only\": false,")
-            .append("  \"message\": {")
-            .append("    \"notification\": {")
-            .append("      \"title\": \"").append(message.getTitle()).append("\",")
-            .append("      \"body\": \"").append(message.getBody()).append("\"")
+            .append("  \"message\": {");
+    // TODO sending notifications differently between Android and iOS, waiting for message handling implementation in iOS
+    if(StringUtils.isNotBlank(message.getDeviceType()) && message.getDeviceType().equals("android")) {
+      requestBody.append("    \"data\": {");
+    } else {
+      requestBody.append("    \"notification\": {");
+    }
+    requestBody.append("      \"title\": \"").append(message.getTitle().replaceAll("\"", "\\\\\"")).append("\",")
+            .append("      \"body\": \"").append(message.getBody().replaceAll("\"", "\\\\\"")).append("\"")
             .append("    },");
     if(fcmMessageExpirationTime != null && StringUtils.isNotBlank(message.getDeviceType())) {
       if(message.getDeviceType().equals("android")) {
