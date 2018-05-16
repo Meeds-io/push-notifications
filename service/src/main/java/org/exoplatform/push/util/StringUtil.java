@@ -22,7 +22,7 @@ public class StringUtil {
 
     StringBuilder maskedText = new StringBuilder(textToMask.length());
     for(int i = 0; i < maskLength; i++){
-      maskedText.append("*");
+      maskedText.append("x");
     }
 
     return maskedText.append(textToMask.substring(maskLength)).toString();

@@ -26,6 +26,9 @@ public class PushChannel extends AbstractChannel {
 
   public final static String ID = "PUSH_CHANNEL";
 
+  public final static String LOG_SERVICE_NAME = "notifications";
+  public final static String LOG_OPERATION_NAME = "send-push-notification";
+
   public String notificationTitle;
 
   private final ChannelKey key = ChannelKey.key(ID);
@@ -59,28 +62,38 @@ public class PushChannel extends AbstractChannel {
   public void dispatch(NotificationContext ctx, String userId) {
     NotificationInfo notificationInfo = ctx.getNotificationInfo();
     String pluginId = notificationInfo.getKey().getId();
-    String templateFilePath = this.templateFilePaths.get(pluginId);
-    LOG.info("Push::{ userId:" + userId + ", pluginId: " + pluginId + ", templateFilePath: " + templateFilePath + "}");
+    LOG.debug("Received push notification sending order for user {} and pluginId {}", userId, pluginId);
 
     List<Device> devices = deviceService.getDevicesByUser(userId);
 
     if(devices != null) {
+      LOG.debug("Found {} registered devices for user {}", devices.size(), userId);
       devices.forEach(device -> {
+        long startTimeSendingMessage = System.currentTimeMillis();
         try {
           AbstractTemplateBuilder builder = getTemplateBuilder(ctx.getNotificationInfo().getKey());
           if (builder != null) {
             MessageInfo messageInfo = builder.buildMessage(ctx);
             if (messageInfo != null) {
+              String maskedToken = StringUtil.mask(device.getToken(), 4);
               LOG.info("Sending push notification to user {} (token={})",
-                      userId, StringUtil.mask(device.getToken(), 4));
+                      userId, maskedToken);
               Message message = new Message(userId, device.getToken(), device.getType(), notificationTitle, messageInfo.getBody());
               messagePublisher.send(message);
+              long sendMessageExecutionTime = System.currentTimeMillis() - startTimeSendingMessage;
+              LOG.info("service={} operation={} parameters=\"user:{},token:{},type:{},pluginId:{}\" status=ok duration_ms={}", 
+                      LOG_SERVICE_NAME, LOG_OPERATION_NAME, userId, maskedToken, device.getType(), pluginId, sendMessageExecutionTime);
             }
           }
         } catch (Exception e) {
+          long sendMessageExecutionTime = System.currentTimeMillis() - startTimeSendingMessage;
           LOG.error("Cannot send push notification to user " + userId, e);
+          LOG.info("service={} operation={} parameters=\"user:{},token:{},type:{},pluginId:{}\" status=ko duration_ms={} error_msg=\"{}\"", 
+                      LOG_SERVICE_NAME, LOG_OPERATION_NAME, userId, StringUtil.mask(device.getToken(), 4), device.getType(), pluginId, sendMessageExecutionTime, e.getMessage());
         }
       });
+    } else {
+      LOG.debug("No device registered for user {}", userId);
     }
   }
 

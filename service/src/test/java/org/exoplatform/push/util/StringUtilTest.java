@@ -8,10 +8,10 @@ public class StringUtilTest {
 
   @Test
   public void shouldMask() {
-    assertEquals("***************", StringUtil.mask("12345678901234567890", 0));
-    assertEquals("*************90", StringUtil.mask("12345678901234567890", 2));
-    assertEquals("***********7890", StringUtil.mask("12345678901234567890", 4));
-    assertEquals("*********567890", StringUtil.mask("12345678901234567890", 6));
+    assertEquals("xxxxxxxxxxxxxxx", StringUtil.mask("12345678901234567890", 0));
+    assertEquals("xxxxxxxxxxxxx90", StringUtil.mask("12345678901234567890", 2));
+    assertEquals("xxxxxxxxxxx7890", StringUtil.mask("12345678901234567890", 4));
+    assertEquals("xxxxxxxxx567890", StringUtil.mask("12345678901234567890", 6));
   }
 
   @Test

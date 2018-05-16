@@ -43,6 +43,9 @@ public class FCMMessagePublisher implements MessagePublisher {
 
   private static final Log LOG = ExoLogger.getLogger(FCMMessagePublisher.class);
 
+  public final static String LOG_SERVICE_NAME = "firebase-cloud-messaging";
+  public final static String LOG_OPERATION_NAME = "send-push-notification";
+
   private CloseableHttpClient httpClient;
 
   private String fcmServiceAccountFilePath;
@@ -151,13 +154,27 @@ public class FCMMessagePublisher implements MessagePublisher {
 
     post.setEntity(new ByteArrayEntity(requestBody.toString().getBytes()));
 
+    long startTimeSendingMessage = System.currentTimeMillis();
+
     try(CloseableHttpResponse response = httpClient.execute(post)) {
+      long sendMessageExecutionTime = System.currentTimeMillis() - startTimeSendingMessage;
       if (response == null || response.getStatusLine() == null) {
-        throw new Exception("Error sending Push Notification, response is null");
+        String errorMessage = "Error sending Push Notification, HTTP response or HTTP response code is null";
+        LOG.info("remote_service={} operation={} parameters=\"user:{},token:{},type:{}\" status=ko duration_ms={} error_msg=\"{}\"", 
+                      LOG_SERVICE_NAME, LOG_OPERATION_NAME, message.getReceiver(), StringUtil.mask(message.getToken(), 4),
+                      message.getDeviceType(), sendMessageExecutionTime, errorMessage);
+        throw new Exception(errorMessage);
       } else if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-        throw new Exception("Error sending Push Notification, response is " + response.getStatusLine().getStatusCode()
-                + " - " + response.getStatusLine().getReasonPhrase());
+        String errorMessage = "Error sending Push Notification, response is " + response.getStatusLine().getStatusCode()
+                      + " - " + response.getStatusLine().getReasonPhrase();
+        LOG.info("remote_service={} operation={} parameters=\"user:{},token:{},type:{}\" status=ko status_code={} duration_ms={} error_msg=\"{}\"", 
+                      LOG_SERVICE_NAME, LOG_OPERATION_NAME, message.getReceiver(), StringUtil.mask(message.getToken(), 4),
+                      message.getDeviceType(), response.getStatusLine().getStatusCode(), sendMessageExecutionTime, errorMessage);
+        throw new Exception(errorMessage);
       } else {
+        LOG.info("remote_service={} operation={} parameters=\"user:{},token:{},type:{}\" status=ok duration_ms={}", 
+                      LOG_SERVICE_NAME, LOG_OPERATION_NAME, message.getReceiver(), StringUtil.mask(message.getToken(), 4),
+                      message.getDeviceType(), sendMessageExecutionTime);
         LOG.info("Message sent to Firebase : username={}, token={}, type={}",
                 message.getReceiver(), StringUtil.mask(message.getToken(), 4), message.getDeviceType());
       }
