@@ -6,13 +6,15 @@ public class Message {
   private String deviceType;
   private String title;
   private String body;
+  private String url;
 
-  public Message(String receiver, String token, String deviceType, String title, String body) {
+  public Message(String receiver, String token, String deviceType, String title, String body, String url) {
     this.receiver = receiver;
     this.token = token;
     this.deviceType = deviceType;
     this.title = title;
     this.body = body;
+    this.url = url;
   }
 
   public String getReceiver() {
@@ -53,5 +55,13 @@ public class Message {
 
   public void setBody(String body) {
     this.body = body;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public void setUrl(String url) {
+    this.url = url;
   }
 }

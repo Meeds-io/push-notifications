@@ -24,7 +24,7 @@ public class FCMLegacyAPIMessagePublisherTest {
     FCMLegacyAPIMessagePublisher messagePublisher = new FCMLegacyAPIMessagePublisher(null, httpClient);
 
     // When
-    messagePublisher.send(new Message("", "", "", "", ""));
+    messagePublisher.send(new Message("", "", "", "", "", ""));
 
     // Then
     verify(httpClient, never()).execute(any());
@@ -38,7 +38,7 @@ public class FCMLegacyAPIMessagePublisherTest {
     FCMLegacyAPIMessagePublisher messagePublisher = new FCMLegacyAPIMessagePublisher(initParams, httpClient);
 
     // When
-    messagePublisher.send(new Message("", "", "", "", ""));
+    messagePublisher.send(new Message("", "", "", "", "", ""));
 
     // Then
     verify(httpClient, never()).execute(any());
@@ -58,7 +58,7 @@ public class FCMLegacyAPIMessagePublisherTest {
     ArgumentCaptor<HttpPost> reqArgs = ArgumentCaptor.forClass(HttpPost.class);
 
     // When
-    messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body"));
+    messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body", ""));
 
     // Then
     verify(httpClient, times(1)).execute(reqArgs.capture());
@@ -90,7 +90,7 @@ public class FCMLegacyAPIMessagePublisherTest {
     ArgumentCaptor<HttpPost> reqArgs = ArgumentCaptor.forClass(HttpPost.class);
 
     // When
-    messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body"));
+    messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body", ""));
 
     // Then
     verify(httpClient, times(1)).execute(reqArgs.capture());

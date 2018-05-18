@@ -32,7 +32,7 @@ public class FCMMessagePublisherTest {
     FCMMessagePublisher messagePublisher = new FCMMessagePublisher(null, httpClient);
 
     // When
-    messagePublisher.send(new Message("", "", "", "", ""));
+    messagePublisher.send(new Message("", "", "", "", "", ""));
 
     // Then
     verify(httpClient, never()).execute(any());
@@ -46,7 +46,7 @@ public class FCMMessagePublisherTest {
     FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient);
 
     // When
-    messagePublisher.send(new Message("", "", "", "", ""));
+    messagePublisher.send(new Message("", "", "", "", "", ""));
 
     // Then
     verify(httpClient, never()).execute(any());
@@ -64,7 +64,7 @@ public class FCMMessagePublisherTest {
     FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient);
 
     // When
-    messagePublisher.send(new Message("", "", "", "", ""));
+    messagePublisher.send(new Message("", "", "", "", "", ""));
 
     // Then
     verify(httpClient, never()).execute(any());
@@ -97,8 +97,8 @@ public class FCMMessagePublisherTest {
     ArgumentCaptor<HttpPost> reqArgs = ArgumentCaptor.forClass(HttpPost.class);
 
     // When
-    messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body"));
-    messagePublisher.send(new Message("mary", "token2", "ios", "My Notification Title", "My Notification Body"));
+    messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body", "http://notification.url/target"));
+    messagePublisher.send(new Message("mary", "token2", "ios", "My Notification Title", "My Notification Body", "http://notification.url/target"));
 
     // Then
     verify(httpClient, times(2)).execute(reqArgs.capture());
@@ -114,6 +114,7 @@ public class FCMMessagePublisherTest {
     JSONObject notification = message.getJSONObject("data");
     assertEquals("My Notification Title", notification.getString("title"));
     assertEquals("My Notification Body", notification.getString("body"));
+    assertEquals("http://notification.url/target", notification.getString("url"));
     assertEquals("token1", message.getString("token"));
     assertFalse(message.has("android"));
     assertFalse(message.has("ios"));
@@ -127,6 +128,7 @@ public class FCMMessagePublisherTest {
     notification = message.getJSONObject("notification");
     assertEquals("My Notification Title", notification.getString("title"));
     assertEquals("My Notification Body", notification.getString("body"));
+    assertEquals("http://notification.url/target", notification.getString("url"));
     assertEquals("token2", message.getString("token"));
     assertFalse(message.has("android"));
     assertFalse(message.has("apns"));
@@ -160,7 +162,7 @@ public class FCMMessagePublisherTest {
 
     try {
       // When
-      messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body"));
+      messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body", ""));
       fail("An exception must be thrown when FCM returns an error");
     } catch(Exception e) {
       // Then
@@ -200,8 +202,8 @@ public class FCMMessagePublisherTest {
     ArgumentCaptor<HttpPost> reqArgs = ArgumentCaptor.forClass(HttpPost.class);
 
     // When
-    messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body"));
-    messagePublisher.send(new Message("mary", "token2", "ios", "My Notification Title", "My Notification Body"));
+    messagePublisher.send(new Message("john", "token1", "android", "My Notification Title", "My Notification Body", ""));
+    messagePublisher.send(new Message("mary", "token2", "ios", "My Notification Title", "My Notification Body", ""));
 
     // Then
     verify(httpClient, times(2)).execute(reqArgs.capture());

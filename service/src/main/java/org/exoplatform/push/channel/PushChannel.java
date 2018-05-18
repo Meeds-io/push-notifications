@@ -78,7 +78,7 @@ public class PushChannel extends AbstractChannel {
               String maskedToken = StringUtil.mask(device.getToken(), 4);
               LOG.info("Sending push notification to user {} (token={})",
                       userId, maskedToken);
-              Message message = new Message(userId, device.getToken(), device.getType(), notificationTitle, messageInfo.getBody());
+              Message message = new Message(userId, device.getToken(), device.getType(), notificationTitle, messageInfo.getBody(), messageInfo.getSubject());
               messagePublisher.send(message);
               long sendMessageExecutionTime = System.currentTimeMillis() - startTimeSendingMessage;
               LOG.info("service={} operation={} parameters=\"user:{},token:{},type:{},pluginId:{}\" status=ok duration_ms={}", 
