@@ -1,27 +1,29 @@
 package org.exoplatform.push.service.fcm;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpStatus;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicStatusLine;
-import org.exoplatform.container.xml.InitParams;
-import org.exoplatform.container.xml.ValueParam;
-import org.exoplatform.push.domain.Message;
-import org.json.JSONObject;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicStatusLine;
+import org.json.JSONObject;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+import org.exoplatform.container.xml.InitParams;
+import org.exoplatform.container.xml.ValueParam;
+import org.exoplatform.push.domain.Message;
+import org.exoplatform.push.exception.InvalidTokenException;
 
 public class FCMMessagePublisherTest {
 
@@ -179,15 +181,7 @@ public class FCMMessagePublisherTest {
     when(httpResponse.getStatusLine()).thenReturn(
             new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_OK, ""));
     when(httpClient.execute(any())).thenReturn(httpResponse);
-    InitParams initParams = new InitParams();
-    ValueParam serverKeyParam = new ValueParam();
-    serverKeyParam.setName("serviceAccountFilePath");
-    serverKeyParam.setValue(this.getClass().getResource("/fcm-test.json").getPath());
-    initParams.addParameter(serverKeyParam);
-    ValueParam messageExpirationTimeParam = new ValueParam();
-    messageExpirationTimeParam.setName("messageExpirationTime");
-    messageExpirationTimeParam.setValue("60");
-    initParams.addParameter(messageExpirationTimeParam);
+    InitParams initParams = buildInitParams();
     FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
@@ -236,5 +230,144 @@ public class FCMMessagePublisherTest {
     JSONObject ios = message.getJSONObject("apns");
     assertEquals("60s", android.getString("ttl"));
     assertFalse(message.has("ios"));
+  }
+
+  @Test
+  public void shouldNotThrowInvalidTokenExceptionWhenResponseNotInvalidToken() throws Exception {
+    // Given
+    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
+    CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
+    when(httpResponse.getStatusLine()).thenReturn(
+            new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_BAD_REQUEST, ""));
+    String invalidTokenResponse = "{\n" +
+            "  \"error\": {\n" +
+            "    \"code\": 400,\n" +
+            "    \"message\": \"Request contains an invalid argument.\",\n" +
+            "    \"status\": \"QUOTA_EXCEEDED\"\n" +
+            "  }\n" +
+            "}";
+    HttpEntity httpEntity = new ByteArrayEntity(invalidTokenResponse.getBytes());
+    when(httpResponse.getEntity()).thenReturn(httpEntity);
+    when(httpClient.execute(any())).thenReturn(httpResponse);
+    InitParams initParams = buildInitParams();
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
+      @Override
+      protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
+        return mock(PrivateKey.class);
+      }
+      @Override
+      protected String getAccessToken() throws IOException {
+        return "fakeAccessToken";
+      }
+    };
+
+    // When
+    try {
+      messagePublisher.send(new Message("", "", "", "", "", ""));
+    } catch (InvalidTokenException e) {
+      // Then
+      fail("Should return an Exception, not an InvalidTokenException");
+    } catch (Exception e) {
+      // Then should return an Exception
+    }
+  }
+
+  @Test(expected = InvalidTokenException.class)
+  public void shouldThrowInvalidTokenExceptionWhenResponseUnregistered() throws Exception {
+    // Given
+    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
+    CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
+    when(httpResponse.getStatusLine()).thenReturn(
+            new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_BAD_REQUEST, ""));
+    String invalidTokenResponse = "{\n" +
+            "  \"error\": {\n" +
+            "    \"code\": 400,\n" +
+            "    \"message\": \"Request contains an invalid argument.\",\n" +
+            "    \"status\": \"UNREGISTERED\"\n" +
+            "  }\n" +
+            "}";
+    HttpEntity httpEntity = new ByteArrayEntity(invalidTokenResponse.getBytes());
+    when(httpResponse.getEntity()).thenReturn(httpEntity);
+    when(httpClient.execute(any())).thenReturn(httpResponse);
+    InitParams initParams = buildInitParams();
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
+      @Override
+      protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
+        return mock(PrivateKey.class);
+      }
+      @Override
+      protected String getAccessToken() throws IOException {
+        return "fakeAccessToken";
+      }
+    };
+
+    // When
+    messagePublisher.send(new Message("", "", "", "", "", ""));
+
+    // Then should return an InvalidTokenException
+  }
+
+
+  @Test(expected = InvalidTokenException.class)
+  public void shouldThrowInvalidTokenExceptionWhenResponseInvalidToken() throws Exception {
+    // Given
+    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
+    CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
+    when(httpResponse.getStatusLine()).thenReturn(
+            new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_BAD_REQUEST, ""));
+    String invalidTokenResponse = "{\n" +
+            "  \"error\": {\n" +
+            "    \"code\": 400,\n" +
+            "    \"message\": \"Request contains an invalid argument.\",\n" +
+            "    \"status\": \"INVALID_ARGUMENT\",\n" +
+            "    \"details\": [\n" +
+            "      {\n" +
+            "        \"@type\": \"type.googleapis.com/google.firebase.fcm.v1.FcmError\",\n" +
+            "        \"errorCode\": \"INVALID_ARGUMENT\"\n" +
+            "      },\n" +
+            "      {\n" +
+            "        \"@type\": \"type.googleapis.com/google.rpc.BadRequest\",\n" +
+            "        \"fieldViolations\": [\n" +
+            "          {\n" +
+            "            \"field\": \"message.token\",\n" +
+            "            \"description\": \"Invalid registration token\"\n" +
+            "          }\n" +
+            "        ]\n" +
+            "      }\n" +
+            "    ]\n" +
+            "  }\n" +
+            "}";
+    HttpEntity httpEntity = new ByteArrayEntity(invalidTokenResponse.getBytes());
+    when(httpResponse.getEntity()).thenReturn(httpEntity);
+    when(httpClient.execute(any())).thenReturn(httpResponse);
+    InitParams initParams = buildInitParams();
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
+      @Override
+      protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
+        return mock(PrivateKey.class);
+      }
+      @Override
+      protected String getAccessToken() throws IOException {
+        return "fakeAccessToken";
+      }
+    };
+
+    // When
+    messagePublisher.send(new Message("", "", "", "", "", ""));
+
+    // Then should return an InvalidTokenException
+  }
+
+  private InitParams buildInitParams() {
+    InitParams initParams = new InitParams();
+    ValueParam serverKeyParam = new ValueParam();
+    serverKeyParam.setName("serviceAccountFilePath");
+    serverKeyParam.setValue(this.getClass().getResource("/fcm-test.json").getPath());
+    initParams.addParameter(serverKeyParam);
+    ValueParam messageExpirationTimeParam = new ValueParam();
+    messageExpirationTimeParam.setName("messageExpirationTime");
+    messageExpirationTimeParam.setValue("60");
+    initParams.addParameter(messageExpirationTimeParam);
+    return initParams;
   }
 }

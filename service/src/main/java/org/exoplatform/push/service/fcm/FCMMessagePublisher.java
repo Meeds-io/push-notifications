@@ -5,6 +5,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson.JacksonFactory;
+import com.google.api.client.util.ArrayMap;
 import com.google.api.client.util.PemReader;
 import com.google.api.client.util.SecurityUtils;
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +19,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
 import org.exoplatform.push.domain.Message;
+import org.exoplatform.push.exception.InvalidTokenException;
 import org.exoplatform.push.service.MessagePublisher;
 import org.exoplatform.push.util.StringUtil;
 import org.exoplatform.services.log.ExoLogger;
@@ -35,6 +37,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Message publisher using the HTTP API v1 of Firebase Cloud Messaging
@@ -171,6 +174,12 @@ public class FCMMessagePublisher implements MessagePublisher {
         LOG.info("remote_service={} operation={} parameters=\"user:{},token:{},type:{}\" status=ko status_code={} duration_ms={} error_msg=\"{}\"", 
                       LOG_SERVICE_NAME, LOG_OPERATION_NAME, message.getReceiver(), StringUtil.mask(message.getToken(), 4),
                       message.getDeviceType(), response.getStatusLine().getStatusCode(), sendMessageExecutionTime, errorMessage);
+
+        // check if the token is invalid to throw a specific exception
+        if(isTokenInvalid(response)) {
+          throw new InvalidTokenException(errorMessage);
+        }
+        // otherwise throw a general exception
         throw new Exception(errorMessage);
       } else {
         LOG.info("remote_service={} operation={} parameters=\"user:{},token:{},type:{}\" status=ok duration_ms={}", 
@@ -180,6 +189,44 @@ public class FCMMessagePublisher implements MessagePublisher {
                 message.getReceiver(), StringUtil.mask(message.getToken(), 4), message.getDeviceType());
       }
     }
+  }
+
+  /**
+   * Check if the response states that the token is invalid
+   * @param response The HTTP response content
+   * @return true if the token is invalid
+   * @throws IOException
+   */
+  private boolean isTokenInvalid(CloseableHttpResponse response) throws IOException {
+    if(response.getStatusLine().getStatusCode() == HttpStatus.SC_BAD_REQUEST) {
+      JacksonFactory jsonFactory = new JacksonFactory();
+      JsonObjectParser parser = new JsonObjectParser(jsonFactory);
+      FcmResponse responseContent = parser.parseAndClose(response.getEntity().getContent(), Charset.forName("UTF-8"), FcmResponse.class);
+      FcmError error = responseContent.getError();
+      if(error != null) {
+        String errorStatus = error.getStatus();
+        if (errorStatus != null) {
+          if (errorStatus.equals("UNREGISTERED")) {
+            return true;
+          } else if(errorStatus.equals("INVALID_ARGUMENT")) {
+            List<FcmDetail> details = error.getDetails();
+            if(details != null) {
+              for(FcmDetail detail : details) {
+                List<ArrayMap> fieldViolations = (List<ArrayMap>) detail.get("fieldViolations");
+                if(fieldViolations != null) {
+                  if(fieldViolations.stream()
+                          .anyMatch(fieldViolation -> fieldViolation.get("field") != null && fieldViolation.get("field").equals("message.token"))) {
+                    return true;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return false;
   }
 
   /**

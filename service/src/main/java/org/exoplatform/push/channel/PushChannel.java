@@ -10,6 +10,7 @@ import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.push.domain.Device;
 import org.exoplatform.push.domain.Message;
+import org.exoplatform.push.exception.InvalidTokenException;
 import org.exoplatform.push.service.DeviceService;
 import org.exoplatform.push.service.MessagePublisher;
 import org.exoplatform.push.util.StringUtil;
@@ -90,6 +91,11 @@ public class PushChannel extends AbstractChannel {
           LOG.error("Cannot send push notification to user " + userId, e);
           LOG.info("service={} operation={} parameters=\"user:{},token:{},type:{},pluginId:{}\" status=ko duration_ms={} error_msg=\"{}\"", 
                       LOG_SERVICE_NAME, LOG_OPERATION_NAME, userId, StringUtil.mask(device.getToken(), 4), device.getType(), pluginId, sendMessageExecutionTime, e.getMessage());
+
+          if(e instanceof InvalidTokenException) {
+            LOG.info("Removing device of user {} (token={}) since the token is invalid", userId, StringUtil.mask(device.getToken(), 4));
+            deviceService.deleteDevice(deviceService.getDeviceByToken(device.getToken()));
+          }
         }
       });
     } else {
