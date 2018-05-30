@@ -16,7 +16,10 @@
  */
 package org.exoplatform.push.channel.template;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.NotificationMessageUtils;
 import org.exoplatform.commons.api.notification.annotation.TemplateConfig;
@@ -25,29 +28,18 @@ import org.exoplatform.commons.api.notification.channel.template.AbstractTemplat
 import org.exoplatform.commons.api.notification.model.MessageInfo;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
-import org.exoplatform.commons.api.notification.plugin.NotificationPluginUtils;
-import org.exoplatform.commons.api.notification.service.template.TemplateContext;
-import org.exoplatform.commons.notification.NotificationUtils;
-import org.exoplatform.commons.notification.template.TemplateUtils;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.identity.model.Identity;
-import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
-import org.exoplatform.social.core.identity.provider.SpaceIdentityProvider;
 import org.exoplatform.social.core.service.LinkProvider;
 import org.exoplatform.social.core.space.model.Space;
-import org.exoplatform.social.notification.LinkProviderUtils;
 import org.exoplatform.social.notification.Utils;
 import org.exoplatform.social.notification.channel.template.WebTemplateProvider;
 import org.exoplatform.social.notification.plugin.*;
 import org.exoplatform.wcm.notification.plugin.ShareFileToSpacePlugin;
 import org.exoplatform.wcm.notification.plugin.ShareFileToUserPlugin;
-import org.exoplatform.webui.utils.TimeConvertUtils;
-
-import java.io.Writer;
-import java.util.*;
 
 /**
  * Templates for Push Notifications.
@@ -59,8 +51,10 @@ import java.util.*;
 @TemplateConfigs (
   templates = {
     @TemplateConfig(pluginId = ActivityCommentPlugin.ID, template = "war:/push-notifications/templates/ActivityCommentPlugin.gtmpl"),
+    @TemplateConfig(pluginId = ActivityReplyToCommentPlugin.ID, template = "war:/push-notifications/templates/ActivityReplyToCommentPlugin.gtmpl"),
     @TemplateConfig(pluginId = ActivityMentionPlugin.ID, template = "war:/push-notifications/templates/ActivityMentionPlugin.gtmpl"),
     @TemplateConfig(pluginId = LikePlugin.ID, template = "war:/push-notifications/templates/LikePlugin.gtmpl"),
+    @TemplateConfig(pluginId = LikeCommentPlugin.ID, template = "war:/push-notifications/templates/LikeCommentPlugin.gtmpl"),
     @TemplateConfig(pluginId = NewUserPlugin.ID, template = "war:/push-notifications/templates/NewUserPlugin.gtmpl"),
     @TemplateConfig(pluginId = PostActivityPlugin.ID, template = "war:/push-notifications/templates/PostActivityPlugin.gtmpl"),
     @TemplateConfig(pluginId = PostActivitySpaceStreamPlugin.ID, template = "war:/push-notifications/templates/PostActivitySpaceStreamPlugin.gtmpl"),
@@ -108,6 +102,29 @@ public class PushTemplateProvider extends WebTemplateProvider {
     }
   };
 
+  /** Defines the template builder for ActivityReplyToCommentPlugin*/
+  private AbstractTemplateBuilder replyToComment = new AbstractTemplateBuilder() {
+
+    @Override
+    protected MessageInfo makeMessage(NotificationContext ctx) {
+      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(ActivityReplyToCommentPlugin.ID)).buildMessage(ctx);
+
+      NotificationInfo notification = ctx.getNotificationInfo();
+      boolean notHighLightComment = Boolean.valueOf(notification.getValueOwnerParameter(NotificationMessageUtils.NOT_HIGHLIGHT_COMMENT_PORPERTY.getKey()));
+      String activityId = notification.getValueOwnerParameter(SocialNotificationUtils.ACTIVITY_ID.getKey());
+      String replyToCommentId = notification.getValueOwnerParameter(SocialNotificationUtils.COMMENT_REPLY_ID.getKey());
+
+      String url = CommonsUtils.getCurrentDomain() + LinkProvider.getSingleActivityUrl(notHighLightComment ? activityId : activityId + "#comment-" + replyToCommentId);
+
+      return messageInfo.subject(url).end();
+    }
+
+    @Override
+    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
+      return false;
+    }
+  };
+
   /** Defines the template builder for ActivityMentionPlugin*/
   private AbstractTemplateBuilder mention = new AbstractTemplateBuilder() {
 
@@ -130,6 +147,22 @@ public class PushTemplateProvider extends WebTemplateProvider {
     @Override
     protected MessageInfo makeMessage(NotificationContext ctx) {
       MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(LikePlugin.ID)).buildMessage(ctx);
+
+      return messageInfo.subject(getActivityUrl(ctx)).end();
+    }
+
+    @Override
+    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
+      return false;
+    }
+  };
+
+  /** Defines the template builder for LikeCommentPlugin*/
+  private AbstractTemplateBuilder likeComment = new AbstractTemplateBuilder() {
+
+    @Override
+    protected MessageInfo makeMessage(NotificationContext ctx) {
+      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(LikeCommentPlugin.ID)).buildMessage(ctx);
 
       return messageInfo.subject(getActivityUrl(ctx)).end();
     }
@@ -255,8 +288,10 @@ public class PushTemplateProvider extends WebTemplateProvider {
     super(initParams);
     this.webTemplateBuilders.putAll(this.templateBuilders);
     this.templateBuilders.put(PluginKey.key(ActivityCommentPlugin.ID), comment);
+    this.templateBuilders.put(PluginKey.key(ActivityReplyToCommentPlugin.ID), replyToComment);
     this.templateBuilders.put(PluginKey.key(ActivityMentionPlugin.ID), mention);
     this.templateBuilders.put(PluginKey.key(LikePlugin.ID), like);
+    this.templateBuilders.put(PluginKey.key(LikeCommentPlugin.ID), likeComment);
     this.templateBuilders.put(PluginKey.key(NewUserPlugin.ID), newUser);
     this.templateBuilders.put(PluginKey.key(PostActivityPlugin.ID), postActivity);
     this.templateBuilders.put(PluginKey.key(PostActivitySpaceStreamPlugin.ID), postActivitySpace);
