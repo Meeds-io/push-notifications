@@ -138,8 +138,8 @@ public class FCMMessagePublisher implements MessagePublisher {
               .append("      \"url\": \"").append(message.getUrl()).append("\"")
               .append("    },")
               .append("    \"notification\": {")
-              .append("      \"title\": \"").append(message.getTitle().replaceAll("\"", "\\\\\"")).append("\",")
-              .append("      \"body\": \"").append(message.getBody().replaceAll("\"", "\\\\\"")).append("\"")
+              .append("      \"title\": \"").append(message.getTitle().replaceAll("\\<[^>]*>","").replaceAll("\"", "\\\\\"")).append("\",")
+              .append("      \"body\": \"").append(message.getBody().replaceAll("\\<[^>]*>","").replaceAll("\"", "\\\\\"")).append("\"")
               .append("    },");
     }
     if(fcmMessageExpirationTime != null && StringUtils.isNotBlank(message.getDeviceType())) {

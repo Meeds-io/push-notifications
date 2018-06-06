@@ -138,6 +138,72 @@ public class FCMMessagePublisherTest {
   }
 
   @Test
+  public void shouldSendSanitizedHTMLMessageWhenConfigFileExistsAndResponseOK() throws Exception {
+    // Given
+    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
+    CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
+    when(httpResponse.getStatusLine()).thenReturn(
+            new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_OK, ""));
+    when(httpClient.execute(any())).thenReturn(httpResponse);
+    InitParams initParams = new InitParams();
+    ValueParam serverKeyParam = new ValueParam();
+    serverKeyParam.setName("serviceAccountFilePath");
+    serverKeyParam.setValue(this.getClass().getResource("/fcm-test.json").getPath());
+    initParams.addParameter(serverKeyParam);
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
+      @Override
+      protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
+        return mock(PrivateKey.class);
+      }
+      @Override
+      protected String getAccessToken() throws IOException {
+        return "fakeAccessToken";
+      }
+    };
+
+    ArgumentCaptor<HttpPost> reqArgs = ArgumentCaptor.forClass(HttpPost.class);
+
+    // When
+    messagePublisher.send(new Message("john", "token1", "android", "My <b>Notification</b> Title", "My Notification <div class=\"myclass\">Body</div>", "http://notification.url/target"));
+    messagePublisher.send(new Message("mary", "token2", "ios", "My <b>Notification</b> Title", "My Notification <div class=\"myclass\">Body</div>", "http://notification.url/target"));
+
+    // Then
+    verify(httpClient, times(2)).execute(reqArgs.capture());
+
+    List<HttpPost> httpUriRequests = reqArgs.getAllValues();
+    assertNotNull(httpUriRequests);
+
+    HttpPost httpUriRequest = httpUriRequests.get(0);
+    String body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
+    JSONObject jsonMessage = new JSONObject(body);
+    assertEquals(false, jsonMessage.getBoolean("validate_only"));
+    JSONObject message = jsonMessage.getJSONObject("message");
+    JSONObject data = message.getJSONObject("data");
+    assertEquals("My <b>Notification</b> Title", data.getString("title"));
+    assertEquals("My Notification <div class=\"myclass\">Body</div>", data.getString("body"));
+    assertEquals("http://notification.url/target", data.getString("url"));
+    assertEquals("token1", message.getString("token"));
+    assertFalse(message.has("android"));
+    assertFalse(message.has("ios"));
+
+    httpUriRequest = httpUriRequests.get(1);
+    assertNotNull(httpUriRequest);
+    body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
+    jsonMessage = new JSONObject(body);
+    assertEquals(false, jsonMessage.getBoolean("validate_only"));
+    message = jsonMessage.getJSONObject("message");
+    JSONObject notification = message.getJSONObject("notification");
+    assertEquals("My Notification Title", notification.getString("title"));
+    assertEquals("My Notification Body", notification.getString("body"));
+    data = message.getJSONObject("data");
+    assertEquals("http://notification.url/target", data.getString("url"));
+    assertEquals("token2", message.getString("token"));
+    assertFalse(message.has("android"));
+    assertFalse(message.has("apns"));
+  }
+
+
+  @Test
   public void shouldSendMessageWhenConfigFileExistsAndResponseNOK() throws Exception {
     // Given
     CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
