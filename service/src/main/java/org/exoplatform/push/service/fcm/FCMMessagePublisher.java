@@ -128,14 +128,20 @@ public class FCMMessagePublisher implements MessagePublisher {
             .append("  \"message\": {");
     // TODO sending notifications differently between Android and iOS, waiting for message handling implementation in iOS
     if(StringUtils.isNotBlank(message.getDeviceType()) && message.getDeviceType().equals("android")) {
-      requestBody.append("    \"data\": {");
+      requestBody.append("    \"data\": {")
+              .append("      \"title\": \"").append(message.getTitle().replaceAll("\"", "\\\\\"")).append("\",")
+              .append("      \"body\": \"").append(message.getBody().replaceAll("\"", "\\\\\"")).append("\",")
+              .append("      \"url\": \"").append(message.getUrl()).append("\"")
+              .append("    },");
     } else {
-      requestBody.append("    \"notification\": {");
+      requestBody.append("    \"data\": {")
+              .append("      \"url\": \"").append(message.getUrl()).append("\"")
+              .append("    },")
+              .append("    \"notification\": {")
+              .append("      \"title\": \"").append(message.getTitle().replaceAll("\"", "\\\\\"")).append("\",")
+              .append("      \"body\": \"").append(message.getBody().replaceAll("\"", "\\\\\"")).append("\"")
+              .append("    },");
     }
-    requestBody.append("      \"title\": \"").append(message.getTitle().replaceAll("\"", "\\\\\"")).append("\",")
-            .append("      \"body\": \"").append(message.getBody().replaceAll("\"", "\\\\\"")).append("\",")
-            .append("      \"url\": \"").append(message.getUrl()).append("\"")
-            .append("    },");
     if(fcmMessageExpirationTime != null && StringUtils.isNotBlank(message.getDeviceType())) {
       if(message.getDeviceType().equals("android")) {
         requestBody
@@ -148,7 +154,7 @@ public class FCMMessagePublisher implements MessagePublisher {
                 .append("    \"apns\": {")
                 .append("      \"headers\": {")
                 .append("        \"apns-expiration\": \"").append(expirationInstant.getEpochSecond()).append("\"")
-                .append("      },")
+                .append("      }")
                 .append("    },");
       }
     }

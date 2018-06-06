@@ -113,10 +113,10 @@ public class FCMMessagePublisherTest {
     JSONObject jsonMessage = new JSONObject(body);
     assertEquals(false, jsonMessage.getBoolean("validate_only"));
     JSONObject message = jsonMessage.getJSONObject("message");
-    JSONObject notification = message.getJSONObject("data");
-    assertEquals("My Notification Title", notification.getString("title"));
-    assertEquals("My Notification Body", notification.getString("body"));
-    assertEquals("http://notification.url/target", notification.getString("url"));
+    JSONObject data = message.getJSONObject("data");
+    assertEquals("My Notification Title", data.getString("title"));
+    assertEquals("My Notification Body", data.getString("body"));
+    assertEquals("http://notification.url/target", data.getString("url"));
     assertEquals("token1", message.getString("token"));
     assertFalse(message.has("android"));
     assertFalse(message.has("ios"));
@@ -127,10 +127,11 @@ public class FCMMessagePublisherTest {
     jsonMessage = new JSONObject(body);
     assertEquals(false, jsonMessage.getBoolean("validate_only"));
     message = jsonMessage.getJSONObject("message");
-    notification = message.getJSONObject("notification");
+    JSONObject notification = message.getJSONObject("notification");
     assertEquals("My Notification Title", notification.getString("title"));
     assertEquals("My Notification Body", notification.getString("body"));
-    assertEquals("http://notification.url/target", notification.getString("url"));
+    data = message.getJSONObject("data");
+    assertEquals("http://notification.url/target", data.getString("url"));
     assertEquals("token2", message.getString("token"));
     assertFalse(message.has("android"));
     assertFalse(message.has("apns"));
