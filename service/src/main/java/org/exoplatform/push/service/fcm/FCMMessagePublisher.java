@@ -16,6 +16,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.exoplatform.commons.api.notification.plugin.NotificationPluginUtils;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
 import org.exoplatform.push.domain.Message;
@@ -24,6 +25,8 @@ import org.exoplatform.push.service.MessagePublisher;
 import org.exoplatform.push.util.StringUtil;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.services.resources.ResourceBundleService;
+import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -35,9 +38,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Message publisher using the HTTP API v1 of Firebase Cloud Messaging
@@ -48,6 +49,8 @@ public class FCMMessagePublisher implements MessagePublisher {
 
   public final static String LOG_SERVICE_NAME = "firebase-cloud-messaging";
   public final static String LOG_OPERATION_NAME = "send-push-notification";
+
+  private ResourceBundleService resourceBundleService;
 
   private CloseableHttpClient httpClient;
 
@@ -60,11 +63,11 @@ public class FCMMessagePublisher implements MessagePublisher {
   // How long (in seconds) the message should be kept in FCM storage if the device is offline
   private Integer fcmMessageExpirationTime = null;
 
-  public FCMMessagePublisher(InitParams initParams) {
-    this(initParams, HttpClientBuilder.create().build());
+  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService) {
+    this(initParams, resourceBundleService, HttpClientBuilder.create().build());
   }
 
-  public FCMMessagePublisher(InitParams initParams, CloseableHttpClient httpClient) {
+  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService, CloseableHttpClient httpClient) {
     if(initParams != null) {
       // FCM configuration file
       ValueParam serviceAccountFilePathValueParam = initParams.getValueParam("serviceAccountFilePath");
@@ -108,6 +111,7 @@ public class FCMMessagePublisher implements MessagePublisher {
       }
     }
 
+    this.resourceBundleService = resourceBundleService;
     this.httpClient = httpClient;
   }
 
@@ -122,15 +126,16 @@ public class FCMMessagePublisher implements MessagePublisher {
     post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getAccessToken());
     post.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
 
+    String messageBody = processBody(message);
+
     StringBuilder requestBody = new StringBuilder()
             .append("{")
             .append("  \"validate_only\": false,")
             .append("  \"message\": {");
-    // TODO sending notifications differently between Android and iOS, waiting for message handling implementation in iOS
     if(StringUtils.isNotBlank(message.getDeviceType()) && message.getDeviceType().equals("android")) {
       requestBody.append("    \"data\": {")
               .append("      \"title\": \"").append(message.getTitle().replaceAll("\"", "\\\\\"")).append("\",")
-              .append("      \"body\": \"").append(message.getBody().replaceAll("\"", "\\\\\"")).append("\",")
+              .append("      \"body\": \"").append(messageBody).append("\",")
               .append("      \"url\": \"").append(message.getUrl()).append("\"")
               .append("    },");
     } else {
@@ -139,7 +144,7 @@ public class FCMMessagePublisher implements MessagePublisher {
               .append("    },")
               .append("    \"notification\": {")
               .append("      \"title\": \"").append(message.getTitle().replaceAll("\\<[^>]*>","").replaceAll("\"", "\\\\\"")).append("\",")
-              .append("      \"body\": \"").append(message.getBody().replaceAll("\\<[^>]*>","").replaceAll("\"", "\\\\\"")).append("\"")
+              .append("      \"body\": \"").append(messageBody.replaceAll("\\<[^>]*>","")).append("\"")
               .append("    },");
     }
     if(fcmMessageExpirationTime != null && StringUtils.isNotBlank(message.getDeviceType())) {
@@ -195,6 +200,31 @@ public class FCMMessagePublisher implements MessagePublisher {
                 message.getReceiver(), StringUtil.mask(message.getToken(), 4), message.getDeviceType());
       }
     }
+  }
+
+  /**
+   * Process the notification message body:
+   * * replace images by a text "inline image"
+   * * escape double quotes
+   * @param message The raw message body
+   * @return The transformed message body
+   */
+  protected String processBody(Message message) {
+    String language = NotificationPluginUtils.getLanguage(message.getReceiver());
+    Locale locale;
+    if(StringUtils.isNotEmpty(language)) {
+      locale = new Locale(language);
+    } else {
+      locale = Locale.ENGLISH;
+    }
+
+    ResourceBundle resourceBundle = resourceBundleService.getResourceBundle("locale.portlet.notification.PushNotifications", locale);
+
+    String messageBody = message.getBody();
+    messageBody = SocialNotificationUtils.processImageTitle(messageBody, resourceBundle.getString("Notification.push.label.InlineImage"));
+    messageBody = messageBody.replaceAll("\"", "\\\\\"");
+
+    return messageBody;
   }
 
   /**

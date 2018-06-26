@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.security.PrivateKey;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -16,22 +16,52 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicStatusLine;
+import org.exoplatform.services.resources.ResourceBundleService;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
 import org.exoplatform.push.domain.Message;
 import org.exoplatform.push.exception.InvalidTokenException;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class FCMMessagePublisherTest {
+
+  @Mock
+  private ResourceBundleService resourceBundleService;
+
+  @Mock
+  private CloseableHttpClient httpClient;
+
+  @Mock
+  private CloseableHttpResponse httpResponse;
+
+  @Before
+  public void setup() {
+    ResourceBundle resourceBundle = new ResourceBundle() {
+      @Override
+      protected Object handleGetObject(String key) {
+        return "inline image";
+      }
+
+      @Override
+      public Enumeration<String> getKeys() {
+        return Collections.enumeration(Collections.singleton("Notification.push.label.InlineImage"));
+      }
+    };
+    when(resourceBundleService.getResourceBundle(eq("locale.portlet.notification.PushNotifications"), any(Locale.class))).thenReturn(resourceBundle);
+  }
 
   @Test
   public void shouldNotSendMessageWhenInitParamsAreNull() throws Exception {
     // Given
-    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(null, httpClient);
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(null, resourceBundleService, httpClient);
 
     // When
     messagePublisher.send(new Message("", "", "", "", "", ""));
@@ -43,9 +73,8 @@ public class FCMMessagePublisherTest {
   @Test
   public void shouldNotSendMessageWhenNoConfigFilePathParam() throws Exception {
     // Given
-    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
     InitParams initParams = new InitParams();
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient);
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient);
 
     // When
     messagePublisher.send(new Message("", "", "", "", "", ""));
@@ -57,13 +86,12 @@ public class FCMMessagePublisherTest {
   @Test
   public void shouldNotSendMessageWhenNoConfigFile() throws Exception {
     // Given
-    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
     InitParams initParams = new InitParams();
     ValueParam serverKeyParam = new ValueParam();
     serverKeyParam.setName("serviceAccountFilePath");
     serverKeyParam.setValue("fake.json");
     initParams.addParameter(serverKeyParam);
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient);
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient);
 
     // When
     messagePublisher.send(new Message("", "", "", "", "", ""));
@@ -75,8 +103,6 @@ public class FCMMessagePublisherTest {
   @Test
   public void shouldSendMessageWhenConfigFileExistsAndResponseOK() throws Exception {
     // Given
-    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
-    CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
     when(httpResponse.getStatusLine()).thenReturn(
             new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_OK, ""));
     when(httpClient.execute(any())).thenReturn(httpResponse);
@@ -85,7 +111,7 @@ public class FCMMessagePublisherTest {
     serverKeyParam.setName("serviceAccountFilePath");
     serverKeyParam.setValue(this.getClass().getResource("/fcm-test.json").getPath());
     initParams.addParameter(serverKeyParam);
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -140,8 +166,6 @@ public class FCMMessagePublisherTest {
   @Test
   public void shouldSendSanitizedHTMLMessageWhenConfigFileExistsAndResponseOK() throws Exception {
     // Given
-    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
-    CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
     when(httpResponse.getStatusLine()).thenReturn(
             new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_OK, ""));
     when(httpClient.execute(any())).thenReturn(httpResponse);
@@ -150,7 +174,7 @@ public class FCMMessagePublisherTest {
     serverKeyParam.setName("serviceAccountFilePath");
     serverKeyParam.setValue(this.getClass().getResource("/fcm-test.json").getPath());
     initParams.addParameter(serverKeyParam);
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -202,12 +226,73 @@ public class FCMMessagePublisherTest {
     assertFalse(message.has("apns"));
   }
 
+  @Test
+  public void shouldSendSanitizedHTMLMessageWithInlineImage() throws Exception {
+    // Given
+    when(httpResponse.getStatusLine()).thenReturn(
+            new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_OK, ""));
+    when(httpClient.execute(any())).thenReturn(httpResponse);
+    InitParams initParams = new InitParams();
+    ValueParam serverKeyParam = new ValueParam();
+    serverKeyParam.setName("serviceAccountFilePath");
+    serverKeyParam.setValue(this.getClass().getResource("/fcm-test.json").getPath());
+    initParams.addParameter(serverKeyParam);
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
+      @Override
+      protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
+        return mock(PrivateKey.class);
+      }
+      @Override
+      protected String getAccessToken() throws IOException {
+        return "fakeAccessToken";
+      }
+    };
+
+    ArgumentCaptor<HttpPost> reqArgs = ArgumentCaptor.forClass(HttpPost.class);
+
+    // When
+    messagePublisher.send(new Message("john", "token1", "android", "My <b>Notification</b> Title", "My Notification <div class=\"myclass\">Text</div> <img data-plugin-name='insertImage' src=\"http://fake.com/image.png\"/> Text", "http://notification.url/target"));
+    messagePublisher.send(new Message("mary", "token2", "ios", "My <b>Notification</b> Title", "My Notification <div class=\"myclass\">Text</div> <img data-plugin-name='insertImage' src=\"http://fake.com/image.png\"></img> Text", "http://notification.url/target"));
+
+    // Then
+    verify(httpClient, times(2)).execute(reqArgs.capture());
+
+    List<HttpPost> httpUriRequests = reqArgs.getAllValues();
+    assertNotNull(httpUriRequests);
+
+    HttpPost httpUriRequest = httpUriRequests.get(0);
+    String body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
+    JSONObject jsonMessage = new JSONObject(body);
+    assertEquals(false, jsonMessage.getBoolean("validate_only"));
+    JSONObject message = jsonMessage.getJSONObject("message");
+    JSONObject data = message.getJSONObject("data");
+    assertEquals("My <b>Notification</b> Title", data.getString("title"));
+    assertEquals("My Notification <div class=\"myclass\">Text</div> <i> [inline image] </i> Text", data.getString("body"));
+    assertEquals("http://notification.url/target", data.getString("url"));
+    assertEquals("token1", message.getString("token"));
+    assertFalse(message.has("android"));
+    assertFalse(message.has("ios"));
+
+    httpUriRequest = httpUriRequests.get(1);
+    assertNotNull(httpUriRequest);
+    body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
+    jsonMessage = new JSONObject(body);
+    assertEquals(false, jsonMessage.getBoolean("validate_only"));
+    message = jsonMessage.getJSONObject("message");
+    JSONObject notification = message.getJSONObject("notification");
+    assertEquals("My Notification Title", notification.getString("title"));
+    assertEquals("My Notification Text  [inline image]  Text", notification.getString("body"));
+    data = message.getJSONObject("data");
+    assertEquals("http://notification.url/target", data.getString("url"));
+    assertEquals("token2", message.getString("token"));
+    assertFalse(message.has("android"));
+    assertFalse(message.has("apns"));
+  }
+
 
   @Test
   public void shouldSendMessageWhenConfigFileExistsAndResponseNOK() throws Exception {
     // Given
-    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
-    CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
     when(httpResponse.getStatusLine()).thenReturn(
             new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_UNAUTHORIZED, "Not Authorized"));
     when(httpClient.execute(any())).thenReturn(httpResponse);
@@ -216,7 +301,7 @@ public class FCMMessagePublisherTest {
     serverKeyParam.setName("serviceAccountFilePath");
     serverKeyParam.setValue(this.getClass().getResource("/fcm-test.json").getPath());
     initParams.addParameter(serverKeyParam);
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -243,13 +328,11 @@ public class FCMMessagePublisherTest {
   @Test
   public void shouldSendMessageWithTTLWhenConfigFileExistsAndResponseOK() throws Exception {
     // Given
-    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
-    CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
     when(httpResponse.getStatusLine()).thenReturn(
             new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_OK, ""));
     when(httpClient.execute(any())).thenReturn(httpResponse);
     InitParams initParams = buildInitParams();
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -302,8 +385,6 @@ public class FCMMessagePublisherTest {
   @Test
   public void shouldNotThrowInvalidTokenExceptionWhenResponseNotInvalidToken() throws Exception {
     // Given
-    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
-    CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
     when(httpResponse.getStatusLine()).thenReturn(
             new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_BAD_REQUEST, ""));
     String invalidTokenResponse = "{\n" +
@@ -317,7 +398,7 @@ public class FCMMessagePublisherTest {
     when(httpResponse.getEntity()).thenReturn(httpEntity);
     when(httpClient.execute(any())).thenReturn(httpResponse);
     InitParams initParams = buildInitParams();
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -342,8 +423,6 @@ public class FCMMessagePublisherTest {
   @Test(expected = InvalidTokenException.class)
   public void shouldThrowInvalidTokenExceptionWhenResponseUnregistered() throws Exception {
     // Given
-    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
-    CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
     when(httpResponse.getStatusLine()).thenReturn(
             new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_BAD_REQUEST, ""));
     String invalidTokenResponse = "{\n" +
@@ -357,7 +436,7 @@ public class FCMMessagePublisherTest {
     when(httpResponse.getEntity()).thenReturn(httpEntity);
     when(httpClient.execute(any())).thenReturn(httpResponse);
     InitParams initParams = buildInitParams();
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -378,8 +457,6 @@ public class FCMMessagePublisherTest {
   @Test(expected = InvalidTokenException.class)
   public void shouldThrowInvalidTokenExceptionWhenResponseInvalidToken() throws Exception {
     // Given
-    CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
-    CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
     when(httpResponse.getStatusLine()).thenReturn(
             new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_BAD_REQUEST, ""));
     String invalidTokenResponse = "{\n" +
@@ -408,7 +485,7 @@ public class FCMMessagePublisherTest {
     when(httpResponse.getEntity()).thenReturn(httpEntity);
     when(httpClient.execute(any())).thenReturn(httpResponse);
     InitParams initParams = buildInitParams();
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
