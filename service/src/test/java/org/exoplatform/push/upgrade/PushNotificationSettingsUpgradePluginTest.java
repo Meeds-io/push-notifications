@@ -47,7 +47,7 @@ public class PushNotificationSettingsUpgradePluginTest {
         EntityManagerService entityManagerService = mock(EntityManagerService.class);
 
         InitParams initParams = new InitParams();
-        PushNotificationSettingsUpgradePlugin pushNotificationSettingsUpgradePlugin = new PushNotificationSettingsUpgradePlugin(settingService, organizationService, userSettingService, pluginSettingService, entityManagerService, initParams);
+        PushNotificationSettingsUpgradePlugin pushNotificationSettingsUpgradePlugin = new PushNotificationSettingsUpgradePlugin(settingService, userSettingService, pluginSettingService, entityManagerService, initParams);
 
         // When
         pushNotificationSettingsUpgradePlugin.processUpgrade("5.0.0", "5.1.0");
@@ -80,7 +80,7 @@ public class PushNotificationSettingsUpgradePluginTest {
         EntityManagerService entityManagerService = mock(EntityManagerService.class);
 
         InitParams initParams = new InitParams();
-        PushNotificationSettingsUpgradePlugin pushNotificationSettingsUpgradePlugin = new PushNotificationSettingsUpgradePlugin(settingService, organizationService, userSettingService, pluginSettingService, entityManagerService, initParams);
+        PushNotificationSettingsUpgradePlugin pushNotificationSettingsUpgradePlugin = new PushNotificationSettingsUpgradePlugin(settingService, userSettingService, pluginSettingService, entityManagerService, initParams);
 
         // When
         pushNotificationSettingsUpgradePlugin.processUpgrade("5.0.0", "5.1.0");
@@ -117,7 +117,7 @@ public class PushNotificationSettingsUpgradePluginTest {
         EntityManagerService entityManagerService = mock(EntityManagerService.class);
 
         InitParams initParams = new InitParams();
-        PushNotificationSettingsUpgradePlugin pushNotificationSettingsUpgradePlugin = new PushNotificationSettingsUpgradePlugin(settingService, organizationService, userSettingService, pluginSettingService, entityManagerService, initParams);
+        PushNotificationSettingsUpgradePlugin pushNotificationSettingsUpgradePlugin = new PushNotificationSettingsUpgradePlugin(settingService, userSettingService, pluginSettingService, entityManagerService, initParams);
 
         // When
         pushNotificationSettingsUpgradePlugin.processUpgrade("5.0.0", "5.1.0");
@@ -155,7 +155,7 @@ public class PushNotificationSettingsUpgradePluginTest {
         EntityManagerService entityManagerService = mock(EntityManagerService.class);
 
         InitParams initParams = new InitParams();
-        PushNotificationSettingsUpgradePlugin pushNotificationSettingsUpgradePlugin = new PushNotificationSettingsUpgradePlugin(settingService, organizationService, userSettingService, pluginSettingService, entityManagerService, initParams);
+        PushNotificationSettingsUpgradePlugin pushNotificationSettingsUpgradePlugin = new PushNotificationSettingsUpgradePlugin(settingService, userSettingService, pluginSettingService, entityManagerService, initParams);
 
         // When
         pushNotificationSettingsUpgradePlugin.processUpgrade("5.0.0", "5.1.0");
