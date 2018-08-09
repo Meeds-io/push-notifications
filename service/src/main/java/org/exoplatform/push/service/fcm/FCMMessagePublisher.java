@@ -87,16 +87,15 @@ public class FCMMessagePublisher implements MessagePublisher {
           googleCredential = getCredentialsFromStream(fcmServiceAccountConfiguration);
 
         } catch (FileNotFoundException e) {
-          LOG.error("Push notifications - Firebase Cloud Messaging service account config file is mandatory, " +
-                  "please add it at " + fcmServiceAccountFilePath);
+          LOG.warn("Push notifications - Firebase Cloud Messaging service account config file does not exist, meaning " +
+                  "Push Notifications will not work. Add the file at " + fcmServiceAccountFilePath + " to make it work.");
         } catch (Exception e) {
           LOG.error("Push notifications - Error while loading Firebase Cloud Messaging configuration from config file "
                   + fcmServiceAccountFilePath, e);
         }
       } else {
-        LOG.error("Push notifications - Firebase Cloud Messaging service account config file path is mandatory, " +
-                "please configure it with exo.push.fcm.serviceAccountFilePath property.");
-
+        LOG.warn("Push notifications - Firebase Cloud Messaging service account config file path is not configured, meaning " +
+                "Push Notifications will not work. Configure it with exo.push.fcm.serviceAccountFilePath property.");
       }
 
       // FCM message expiration
