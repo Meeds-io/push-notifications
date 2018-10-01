@@ -31,6 +31,10 @@
     <artifactId>exo-push-notifications-service</artifactId>
     <name>eXo Push notifications addon - Service</name>
 
+    <properties>
+        <exo.test.coverage.ratio>0.48</exo.test.coverage.ratio>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.exoplatform.commons</groupId>
