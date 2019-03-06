@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.exoplatform.addons.push-notifications</groupId>
     <artifactId>exo-push-notifications</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.x-acc210-SNAPSHOT</version>
   </parent>
   <artifactId>exo-push-notifications-webapp</artifactId>
 
