@@ -27,7 +27,7 @@
     <parent>
         <artifactId>addons-parent-pom</artifactId>
         <groupId>org.exoplatform.addons</groupId>
-        <version>9-RC01</version>
+        <version>10-RC01</version>
     </parent>
     <groupId>org.exoplatform.addons.push-notifications</groupId>
     <artifactId>exo-push-notifications</artifactId>
@@ -51,7 +51,7 @@
         <!-- **************************************** -->
         <!-- Dependencies versions -->
         <!-- **************************************** -->
-        <org.exoplatform.platform.version>5.0.0</org.exoplatform.platform.version>
+        <org.exoplatform.platform.version>5.2.x-SNAPSHOT</org.exoplatform.platform.version>
     </properties>
     <dependencyManagement>
         <dependencies>
