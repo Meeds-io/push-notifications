@@ -117,4 +117,18 @@ public class AuthenticationHeaderFilterTest {
     assertTrue(authenticationHeaderTokens.contains("JSESSIONID=valueJSESSIONID"));
     assertTrue(authenticationHeaderTokens.contains("JSESSIONIDSSO=valueJSESSIONIDSSO"));
   }
+
+  @Test
+  public void shouldNotThrowsNPE() {
+
+    AuthenticationHeaderFilter filter = new AuthenticationHeaderFilter();
+    try {
+      filter.getCookieValue(null,"test");
+      assertTrue(Boolean.TRUE);
+    } catch(NullPointerException ex) {
+      fail("NullPointereException in getCookieValue");
+    }
+
+
+  }
 }

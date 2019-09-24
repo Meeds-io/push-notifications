@@ -55,9 +55,11 @@ public class AuthenticationHeaderFilter implements Filter {
   }
 
   protected String getCookieValue(Cookie[] cookies, Object key) {
-    for (int i = 0; i < cookies.length; i++) {
-      if (key.equals(cookies[i].getName())) {
-        return cookies[i].getValue();
+    if (cookies!=null) {
+      for (int i = 0; i < cookies.length; i++) {
+        if (key.equals(cookies[i].getName())) {
+          return cookies[i].getValue();
+        }
       }
     }
     return null;
