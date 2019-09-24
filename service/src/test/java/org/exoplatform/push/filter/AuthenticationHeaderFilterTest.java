@@ -119,7 +119,7 @@ public class AuthenticationHeaderFilterTest {
   }
 
   @Test
-  public void shouldNotThrowsNPE() {
+  public void shouldNotThrowsNPEWhenGettingCookieValueWithNullArray() {
 
     AuthenticationHeaderFilter filter = new AuthenticationHeaderFilter();
     try {
