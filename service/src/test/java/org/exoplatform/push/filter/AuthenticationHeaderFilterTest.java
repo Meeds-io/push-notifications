@@ -119,16 +119,27 @@ public class AuthenticationHeaderFilterTest {
   }
 
   @Test
-  public void shouldNotThrowsNPEWhenGettingCookieValueWithNullArray() {
-
-    AuthenticationHeaderFilter filter = new AuthenticationHeaderFilter();
+  public void shouldNotThrowsNPEWhenGettingCookieValueWithNullArray() throws IOException,ServletException {
     try {
-      filter.getCookieValue(null,"test");
+
+      // Given
+      HttpServletRequest request = mock(HttpServletRequest.class);
+      HttpServletResponse response = mock(HttpServletResponse.class);
+      FilterChain filterChain = mock(FilterChain.class);
+
+      when(request.getRemoteUser()).thenReturn("john");
+      when(request.getCookies()).thenReturn(null);
+
+      AuthenticationHeaderFilter filter = new AuthenticationHeaderFilter();
+
+      // When
+      filter.doFilter(request, response, filterChain);
+
+      // Then
       assertTrue(Boolean.TRUE);
     } catch(NullPointerException ex) {
       fail("NullPointereException in getCookieValue");
     }
-
 
   }
 }
