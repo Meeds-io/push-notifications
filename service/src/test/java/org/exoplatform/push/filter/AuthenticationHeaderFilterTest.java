@@ -136,7 +136,7 @@ public class AuthenticationHeaderFilterTest {
       filter.doFilter(request, response, filterChain);
 
       // Then
-      assertTrue(Boolean.TRUE);
+      // Nothing to test, just that we not throw NPE
     } catch(NullPointerException ex) {
       fail("NullPointereException in getCookieValue");
     }
