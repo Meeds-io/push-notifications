@@ -16,7 +16,7 @@
         </value-param>
         <values-param>
           <name>add.profiles</name>
-          <value>push-notification</value>
+          <value>push-notifications</value>
         </values-param>
         <object-param>
           <name>change</name>
