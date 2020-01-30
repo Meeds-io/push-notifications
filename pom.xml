@@ -41,25 +41,33 @@
         <module>service</module>
     </modules>
     <scm>
-        <connection>scm:git:git://github.com/exoplatform/${artifactId}.git</connection>
-        <developerConnection>scm:git:git@github.com:exoplatform/${artifactId}.git</developerConnection>
+        <connection>scm:git:git://github.com/exoplatform/push-notifications.git</connection>
+        <developerConnection>scm:git:git@github.com:exoplatform/push-notifications.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://github.com/exoplatform/${artifactId}</url>
+        <url>https://github.com/exoplatform/push-notifications</url>
     </scm>
 
     <properties>
         <!-- **************************************** -->
         <!-- Dependencies versions -->
         <!-- **************************************** -->
-        <org.exoplatform.platform.version>6.0.x-SNAPSHOT</org.exoplatform.platform.version>
+        <org.exoplatform.social.version>6.0.x-SNAPSHOT</org.exoplatform.social.version>
+        <org.exoplatform.ecms.version>6.0.x-SNAPSHOT</org.exoplatform.ecms.version>
     </properties>
     <dependencyManagement>
         <dependencies>
             <!-- Import versions from platform project -->
             <dependency>
-                <groupId>org.exoplatform.platform</groupId>
-                <artifactId>platform</artifactId>
-                <version>${org.exoplatform.platform.version}</version>
+                <groupId>org.exoplatform.social</groupId>
+                <artifactId>social</artifactId>
+                <version>${org.exoplatform.social.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.exoplatform.ecms</groupId>
+                <artifactId>ecms</artifactId>
+                <version>${org.exoplatform.ecms.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

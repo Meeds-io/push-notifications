@@ -52,8 +52,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.exoplatform.integration</groupId>
-            <artifactId>integ-ecms-social</artifactId>
+            <groupId>org.exoplatform.ecms</groupId>
+            <artifactId>ecms-social-integration</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -71,6 +71,11 @@
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
