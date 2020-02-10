@@ -24,12 +24,6 @@
         xmlns="http://www.gatein.org/xml/ns/gatein_resources_1_3">
 
   <portal-skin>
-    <skin-name>Default</skin-name>
-    <skin-module>pushNotifications</skin-module>
-    <css-path>/skin/css/push-notifications.css</css-path>
-  </portal-skin>
-
-  <portal-skin>
     <skin-name>Enterprise</skin-name>
     <skin-module>pushNotifications</skin-module>
     <css-path>/skin/css/push-notifications.css</css-path>
