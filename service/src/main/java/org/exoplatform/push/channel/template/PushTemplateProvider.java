@@ -38,8 +38,6 @@ import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.notification.Utils;
 import org.exoplatform.social.notification.channel.template.WebTemplateProvider;
 import org.exoplatform.social.notification.plugin.*;
-import org.exoplatform.wcm.notification.plugin.ShareFileToSpacePlugin;
-import org.exoplatform.wcm.notification.plugin.ShareFileToUserPlugin;
 
 /**
  * Templates for Push Notifications.
@@ -61,8 +59,6 @@ import org.exoplatform.wcm.notification.plugin.ShareFileToUserPlugin;
     @TemplateConfig(pluginId = RelationshipReceivedRequestPlugin.ID, template = "war:/push-notifications/templates/RelationshipReceivedRequestPlugin.gtmpl"),
     @TemplateConfig(pluginId = RequestJoinSpacePlugin.ID, template = "war:/push-notifications/templates/RequestJoinSpacePlugin.gtmpl"),
     @TemplateConfig(pluginId = SpaceInvitationPlugin.ID, template = "war:/push-notifications/templates/SpaceInvitationPlugin.gtmpl"),
-    @TemplateConfig(pluginId = ShareFileToUserPlugin.ID, template = "war:/push-notifications/templates/ShareDocumentToUser.gtmpl"),
-    @TemplateConfig(pluginId = ShareFileToSpacePlugin.ID, template = "war:/push-notifications/templates/ShareDocumentToSpace.gtmpl")
 
   }
 )
