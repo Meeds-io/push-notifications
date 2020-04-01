@@ -117,4 +117,29 @@ public class AuthenticationHeaderFilterTest {
     assertTrue(authenticationHeaderTokens.contains("JSESSIONID=valueJSESSIONID"));
     assertTrue(authenticationHeaderTokens.contains("JSESSIONIDSSO=valueJSESSIONIDSSO"));
   }
+
+  @Test
+  public void shouldNotThrowsNPEWhenGettingCookieValueWithNullArray() throws IOException,ServletException {
+    try {
+
+      // Given
+      HttpServletRequest request = mock(HttpServletRequest.class);
+      HttpServletResponse response = mock(HttpServletResponse.class);
+      FilterChain filterChain = mock(FilterChain.class);
+
+      when(request.getRemoteUser()).thenReturn("john");
+      when(request.getCookies()).thenReturn(null);
+
+      AuthenticationHeaderFilter filter = new AuthenticationHeaderFilter();
+
+      // When
+      filter.doFilter(request, response, filterChain);
+
+      // Then
+      // Nothing to test, just that we not throw NPE
+    } catch(NullPointerException ex) {
+      fail("NullPointereException in getCookieValue");
+    }
+
+  }
 }
