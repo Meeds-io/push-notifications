@@ -51,7 +51,7 @@
         <!-- **************************************** -->
         <!-- Dependencies versions -->
         <!-- **************************************** -->
-        <org.exoplatform.social.version>6.0.x-SNAPSHOT</org.exoplatform.social.version>
+        <org.exoplatform.social.version>6.0.0-M27</org.exoplatform.social.version>
     </properties>
     <dependencyManagement>
         <dependencies>
