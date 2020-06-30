@@ -268,7 +268,7 @@ public class FCMMessagePublisherTest {
 
     // When
     messagePublisher.send(new Message("john", "token1", "android", "My <b>Notification</b> Title", "My Notification <div class=\"myclass\">Text</div> <img data-plugin-name='insertImage' src=\"http://fake.com/image.png\"/> Text", "http://notification.url/target"));
-    messagePublisher.send(new Message("mary", "token2", "ios", "My <b>Notification</b> Title", "My Notification <div class=\"myclass\">Text</div> <img data-plugin-name='insertImage' src=\"http://fake.com/image.png\"></img> Text", "http://notification.url/target"));
+    messagePublisher.send(new Message("mary", "token2", "ios", "My <b>Notification</b> Title", "My Notification <div class=\"myclass\">Text</div> <img data-plugin-name='insertImage' src=\"http://fake.com/image.png\"/> Text", "http://notification.url/target"));
 
     // Then
     verify(httpClient, times(2)).execute(reqArgs.capture());
