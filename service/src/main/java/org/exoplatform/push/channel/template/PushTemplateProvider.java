@@ -20,6 +20,8 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.exoplatform.addons.chat.notification.builder.ChatTemplateBuilder;
+import org.exoplatform.addons.chat.utils.NotificationUtils;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.NotificationMessageUtils;
 import org.exoplatform.commons.api.notification.annotation.TemplateConfig;
@@ -29,6 +31,7 @@ import org.exoplatform.commons.api.notification.model.MessageInfo;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.social.core.activity.model.ExoSocialActivity;
 import org.exoplatform.social.core.identity.model.Identity;
@@ -59,7 +62,7 @@ import org.exoplatform.social.notification.plugin.*;
     @TemplateConfig(pluginId = RelationshipReceivedRequestPlugin.ID, template = "war:/push-notifications/templates/RelationshipReceivedRequestPlugin.gtmpl"),
     @TemplateConfig(pluginId = RequestJoinSpacePlugin.ID, template = "war:/push-notifications/templates/RequestJoinSpacePlugin.gtmpl"),
     @TemplateConfig(pluginId = SpaceInvitationPlugin.ID, template = "war:/push-notifications/templates/SpaceInvitationPlugin.gtmpl"),
-
+    @TemplateConfig(pluginId = NotificationUtils.CHAT_MENTION_NOTIFICATION_PLUGIN, template = "war:/push-notifications/templates/ChatWebPlugin.gtmpl")
   }
 )
 public class PushTemplateProvider extends WebTemplateProvider {
@@ -97,6 +100,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
       return false;
     }
   };
+  private ChatTemplateBuilder chatMention = new ChatTemplateBuilder(this, new ExoContainer(), NotificationUtils.CHAT_MENTION_KEY,true);
 
   /** Defines the template builder for ActivityReplyToCommentPlugin*/
   private AbstractTemplateBuilder replyToComment = new AbstractTemplateBuilder() {
@@ -294,6 +298,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
     this.templateBuilders.put(PluginKey.key(RelationshipReceivedRequestPlugin.ID), relationshipReceived);
     this.templateBuilders.put(PluginKey.key(RequestJoinSpacePlugin.ID), requestJoinSpace);
     this.templateBuilders.put(PluginKey.key(SpaceInvitationPlugin.ID), spaceInvitation);
+    this.templateBuilders.put(NotificationUtils.CHAT_MENTION_KEY,chatMention);
   }
 
   /**
