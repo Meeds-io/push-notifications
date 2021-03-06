@@ -18,6 +18,7 @@ package org.exoplatform.push.filter;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import static org.exoplatform.push.filter.AuthenticationHeaderFilter.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class AuthenticationHeaderFilterTest {
 
     when(request.getRemoteUser()).thenReturn("john");
     List<Cookie> cookies = new ArrayList<>();
-    for (String cookieName : AuthenticationHeaderFilter.COOKIES_TO_PROPAGATE) {
+    for (String cookieName : COOKIES_TO_PROPAGATE) {
       cookies.add(new Cookie(cookieName, "value" + cookieName));
     }
     when(request.getCookies()).thenReturn(cookies.toArray(new Cookie[0]));
@@ -63,16 +64,13 @@ public class AuthenticationHeaderFilterTest {
     String name = headerNameCaptor.getValue();
     String value = headerValueCaptor.getValue();
     assertNotNull(name);
-    assertEquals(AuthenticationHeaderFilter.HEADER_AUTHORIZATION, name);
+    assertEquals(HEADER_AUTHORIZATION, name);
     assertNotNull(value);
     List<String> authenticationHeaderTokens = Arrays.asList(value.split(";"));
     assertEquals(3, authenticationHeaderTokens.size());
-    assertTrue(authenticationHeaderTokens.contains(AuthenticationHeaderFilter.COOKIES_TO_PROPAGATE[0] + "=value"
-        + AuthenticationHeaderFilter.COOKIES_TO_PROPAGATE[0]));
-    assertTrue(authenticationHeaderTokens.contains(AuthenticationHeaderFilter.COOKIES_TO_PROPAGATE[1] + "=value"
-        + AuthenticationHeaderFilter.COOKIES_TO_PROPAGATE[1]));
-    assertTrue(authenticationHeaderTokens.contains(AuthenticationHeaderFilter.COOKIES_TO_PROPAGATE[2] + "=value"
-        + AuthenticationHeaderFilter.COOKIES_TO_PROPAGATE[2]));
+    assertTrue(authenticationHeaderTokens.contains(JSESSION_ID_COOKIE + "=value" + JSESSION_ID_COOKIE));
+    assertTrue(authenticationHeaderTokens.contains(JSESSION_ID_SSO_COOKIE + "=value" + JSESSION_ID_SSO_COOKIE));
+    assertTrue(authenticationHeaderTokens.contains(REMEMBER_ME_COOKIE + "=value" + REMEMBER_ME_COOKIE));
   }
 
   @Test
@@ -88,6 +86,25 @@ public class AuthenticationHeaderFilterTest {
       cookies.add(new Cookie(cookieName, "value" + cookieName));
     }
     when(request.getCookies()).thenReturn(cookies.toArray(new Cookie[0]));
+
+    AuthenticationHeaderFilter filter = new AuthenticationHeaderFilter();
+
+    // When
+    filter.doFilter(request, response, filterChain);
+
+    // Then
+    verify(response, never()).addHeader(any(), any());
+  }
+
+  @Test
+  public void shouldReturnConcatenatedHeaderWithNoCookie() throws IOException, ServletException {
+    // Given
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    FilterChain filterChain = mock(FilterChain.class);
+
+    when(request.getRemoteUser()).thenReturn("test");
+    when(request.getCookies()).thenReturn(null);
 
     AuthenticationHeaderFilter filter = new AuthenticationHeaderFilter();
 
@@ -135,7 +152,7 @@ public class AuthenticationHeaderFilterTest {
   }
 
   @Test
-  public void shouldNotThrowsNPEWhenGettingCookieValueWithNullArray() throws IOException,ServletException {
+  public void shouldNotThrowsNPEWhenGettingCookieValueWithNullArray() throws IOException, ServletException {
     try {
 
       // Given
@@ -153,7 +170,7 @@ public class AuthenticationHeaderFilterTest {
 
       // Then
       // Nothing to test, just that we not throw NPE
-    } catch(NullPointerException ex) {
+    } catch (NullPointerException ex) {
       fail("NullPointereException in getCookieValue");
     }
 
