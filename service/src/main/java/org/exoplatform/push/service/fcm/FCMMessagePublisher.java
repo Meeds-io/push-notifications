@@ -86,8 +86,8 @@ public class FCMMessagePublisher implements MessagePublisher {
     this(initParams, resourceBundleService, webNotificationService, HttpClientBuilder.create().build());
   }
 
-  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService, WebNotificationService webNotificationService, CloseableHttpClient httpClient) {
-    if (initParams != null) {
+  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService, WebNotificationService webNotificationService,  CloseableHttpClient httpClient) {
+    if(initParams != null) {
       // FCM configuration file
       ValueParam serviceAccountFilePathValueParam = initParams.getValueParam("serviceAccountFilePath");
       if (serviceAccountFilePathValueParam != null) {
