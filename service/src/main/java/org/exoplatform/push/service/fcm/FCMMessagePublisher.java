@@ -33,6 +33,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.exoplatform.commons.api.notification.plugin.NotificationPluginUtils;
+import org.exoplatform.commons.api.notification.service.WebNotificationService;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
 import org.exoplatform.push.domain.Message;
@@ -68,6 +69,8 @@ public class FCMMessagePublisher implements MessagePublisher {
 
   private ResourceBundleService resourceBundleService;
 
+  private WebNotificationService webNotificationService;
+
   private CloseableHttpClient httpClient;
 
   private String fcmServiceAccountFilePath;
@@ -79,11 +82,11 @@ public class FCMMessagePublisher implements MessagePublisher {
   // How long (in seconds) the message should be kept in FCM storage if the device is offline
   private Integer fcmMessageExpirationTime = null;
 
-  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService) {
-    this(initParams, resourceBundleService, HttpClientBuilder.create().build());
+  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService, WebNotificationService webNotificationService) {
+    this(initParams, resourceBundleService, webNotificationService, HttpClientBuilder.create().build());
   }
 
-  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService, CloseableHttpClient httpClient) {
+  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService, WebNotificationService webNotificationService,  CloseableHttpClient httpClient) {
     if(initParams != null) {
       // FCM configuration file
       ValueParam serviceAccountFilePathValueParam = initParams.getValueParam("serviceAccountFilePath");
@@ -128,6 +131,7 @@ public class FCMMessagePublisher implements MessagePublisher {
 
     this.resourceBundleService = resourceBundleService;
     this.httpClient = httpClient;
+    this.webNotificationService = webNotificationService;
   }
 
   @Override
@@ -159,7 +163,8 @@ public class FCMMessagePublisher implements MessagePublisher {
               .append("    },")
               .append("    \"notification\": {")
               .append("      \"title\": \"").append(message.getTitle().replaceAll("\\<[^>]*>","").replaceAll("\"", "\\\\\"")).append("\",")
-              .append("      \"body\": \"").append(messageBody.replaceAll("\\<[^>]*>","")).append("\"")
+              .append("      \"body\": \"").append(messageBody.replaceAll("\\<[^>]*>","")).append("\",")
+              .append("      \"badge\": \"").append(webNotificationService.getNumberOnBadge(message.getReceiver())).append("\"")
               .append("    },");
     }
     if(fcmMessageExpirationTime != null && StringUtils.isNotBlank(message.getDeviceType())) {
