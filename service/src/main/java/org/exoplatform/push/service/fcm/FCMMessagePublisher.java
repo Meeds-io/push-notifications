@@ -86,8 +86,8 @@ public class FCMMessagePublisher implements MessagePublisher {
     this(initParams, resourceBundleService, webNotificationService, HttpClientBuilder.create().build());
   }
 
-  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService, WebNotificationService webNotificationService,  CloseableHttpClient httpClient) {
-    if(initParams != null) {
+  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService, WebNotificationService webNotificationService, CloseableHttpClient httpClient) {
+    if (initParams != null) {
       // FCM configuration file
       ValueParam serviceAccountFilePathValueParam = initParams.getValueParam("serviceAccountFilePath");
       if (serviceAccountFilePathValueParam != null) {
@@ -174,16 +174,12 @@ public class FCMMessagePublisher implements MessagePublisher {
       String expirationHeader = "";
       if (fcmMessageExpirationTime != null) {
         Instant expirationInstant = Instant.now().minus(fcmMessageExpirationTime, ChronoUnit.SECONDS);
-        expirationHeader = "      \"headers\": {" +
-                "        \"apns-expiration\": \"" + expirationInstant.getEpochSecond() + "\"" +
-                "      },";
+        expirationHeader = "\"apns-expiration\": \"" + expirationInstant.getEpochSecond() + "\",";
       }
       requestBody.append("    \"apns\": {")
+              .append("      \"headers\": {")
               .append(expirationHeader)
-              .append("      \"payload\": {")
-              .append("        \"aps\": {")
-              .append("          \"badge\": ").append(webNotificationService.getNumberOnBadge(message.getReceiver()))
-              .append("        }")
+              .append("        \"badge\": \"").append(webNotificationService.getNumberOnBadge(message.getReceiver())).append("\"")
               .append("      }")
               .append("    },");
     }
