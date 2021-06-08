@@ -177,19 +177,15 @@ public class FCMMessagePublisherTest {
     JSONObject notification = message.getJSONObject("notification");
     assertEquals("My Notification Title", notification.getString("title"));
     assertEquals("My Notification Body", notification.getString("body"));
-    assertEquals("5", notification.getString("badge"));
     data = message.getJSONObject("data");
     assertEquals("http://notification.url/target", data.getString("url"));
     assertEquals("token2", message.getString("token"));
     assertFalse(message.has("android"));
     assertTrue(message.has("apns"));
     JSONObject apns = message.getJSONObject("apns");
-    assertTrue(apns.has("payload"));
-    JSONObject payload = apns.getJSONObject("payload");
-    assertTrue(payload.has("aps"));
-    JSONObject aps = payload.getJSONObject("aps");
-    assertTrue(aps.has("badge"));
-    assertEquals(5, aps.getInt("badge"));
+    assertTrue(apns.has("headers"));
+    JSONObject headers = apns.getJSONObject("headers");
+    assertEquals("5", headers.getString("badge"));
   }
 
   @Test
@@ -254,12 +250,9 @@ public class FCMMessagePublisherTest {
     assertFalse(message.has("android"));
     assertTrue(message.has("apns"));
     JSONObject apns = message.getJSONObject("apns");
-    assertTrue(apns.has("payload"));
-    JSONObject payload = apns.getJSONObject("payload");
-    assertTrue(payload.has("aps"));
-    JSONObject aps = payload.getJSONObject("aps");
-    assertTrue(aps.has("badge"));
-    assertEquals(5, aps.getInt("badge"));
+    assertTrue(apns.has("headers"));
+    JSONObject headers = apns.getJSONObject("headers");
+    assertEquals("5", headers.getString("badge"));
   }
 
   @Test
@@ -324,12 +317,9 @@ public class FCMMessagePublisherTest {
     assertFalse(message.has("android"));
     assertTrue(message.has("apns"));
     JSONObject apns = message.getJSONObject("apns");
-    assertTrue(apns.has("payload"));
-    JSONObject payload = apns.getJSONObject("payload");
-    assertTrue(payload.has("aps"));
-    JSONObject aps = payload.getJSONObject("aps");
-    assertTrue(aps.has("badge"));
-    assertEquals(5, aps.getInt("badge"));
+    assertTrue(apns.has("headers"));
+    JSONObject headers = apns.getJSONObject("headers");
+    assertEquals("5", headers.getString("badge"));
   }
 
 
