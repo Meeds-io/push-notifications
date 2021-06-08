@@ -187,8 +187,6 @@ public class FCMMessagePublisher implements MessagePublisher {
             .append("  }")
             .append("}");
 
-    LOG.info("sent notification : \n" + requestBody + "\n");
-
     post.setEntity(new ByteArrayEntity(requestBody.toString().getBytes()));
 
     long startTimeSendingMessage = System.currentTimeMillis();
