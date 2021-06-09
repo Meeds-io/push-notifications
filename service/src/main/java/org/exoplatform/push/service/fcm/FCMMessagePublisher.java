@@ -174,12 +174,16 @@ public class FCMMessagePublisher implements MessagePublisher {
       String expirationHeader = "";
       if (fcmMessageExpirationTime != null) {
         Instant expirationInstant = Instant.now().minus(fcmMessageExpirationTime, ChronoUnit.SECONDS);
-        expirationHeader = "\"apns-expiration\": \"" + expirationInstant.getEpochSecond() + "\",";
+        expirationHeader = "      \"headers\": {" +
+                "        \"apns-expiration\": \"" + expirationInstant.getEpochSecond() + "\"" +
+                "      },";
       }
       requestBody.append("    \"apns\": {")
-              .append("      \"headers\": {")
               .append(expirationHeader)
-              .append("        \"badge\": \"").append(webNotificationService.getNumberOnBadge(message.getReceiver())).append("\"")
+              .append("      \"payload\": {")
+              .append("        \"aps\": {")
+              .append("          \"badge\": ").append(webNotificationService.getNumberOnBadge(message.getReceiver()))
+              .append("        }")
               .append("      }")
               .append("    },");
     }

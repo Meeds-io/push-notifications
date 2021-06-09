@@ -183,9 +183,12 @@ public class FCMMessagePublisherTest {
     assertFalse(message.has("android"));
     assertTrue(message.has("apns"));
     JSONObject apns = message.getJSONObject("apns");
-    assertTrue(apns.has("headers"));
-    JSONObject headers = apns.getJSONObject("headers");
-    assertEquals("5", headers.getString("badge"));
+    assertTrue(apns.has("payload"));
+    JSONObject payload = apns.getJSONObject("payload");
+    assertTrue(payload.has("aps"));
+    JSONObject aps = payload.getJSONObject("aps");
+    assertTrue(aps.has("badge"));
+    assertEquals(5, aps.getInt("badge"));
   }
 
   @Test
@@ -256,9 +259,12 @@ public class FCMMessagePublisherTest {
     assertFalse(message.has("android"));
     assertTrue(message.has("apns"));
     JSONObject apns = message.getJSONObject("apns");
-    assertTrue(apns.has("headers"));
-    JSONObject headers = apns.getJSONObject("headers");
-    assertEquals("5", headers.getString("badge"));
+    assertTrue(apns.has("payload"));
+    JSONObject payload = apns.getJSONObject("payload");
+    assertTrue(payload.has("aps"));
+    JSONObject aps = payload.getJSONObject("aps");
+    assertTrue(aps.has("badge"));
+    assertEquals(5, aps.getInt("badge"));
   }
 
   @Test
@@ -323,9 +329,12 @@ public class FCMMessagePublisherTest {
     assertFalse(message.has("android"));
     assertTrue(message.has("apns"));
     JSONObject apns = message.getJSONObject("apns");
-    assertTrue(apns.has("headers"));
-    JSONObject headers = apns.getJSONObject("headers");
-    assertEquals("5", headers.getString("badge"));
+    assertTrue(apns.has("payload"));
+    JSONObject payload = apns.getJSONObject("payload");
+    assertTrue(payload.has("aps"));
+    JSONObject aps = payload.getJSONObject("aps");
+    assertTrue(aps.has("badge"));
+    assertEquals(5, aps.getInt("badge"));
   }
 
 
