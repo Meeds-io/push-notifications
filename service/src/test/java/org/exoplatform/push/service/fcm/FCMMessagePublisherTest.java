@@ -32,6 +32,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicStatusLine;
+import org.exoplatform.commons.api.notification.service.WebNotificationService;
 import org.exoplatform.services.resources.ResourceBundleService;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -58,6 +59,9 @@ public class FCMMessagePublisherTest {
   @Mock
   private CloseableHttpResponse httpResponse;
 
+  @Mock
+  private WebNotificationService webNotificationService;
+
   @Before
   public void setup() {
     ResourceBundle resourceBundle = new ResourceBundle() {
@@ -72,12 +76,13 @@ public class FCMMessagePublisherTest {
       }
     };
     when(resourceBundleService.getResourceBundle(eq("locale.portlet.notification.PushNotifications"), any(Locale.class))).thenReturn(resourceBundle);
+    when(webNotificationService.getNumberOnBadge(anyString())).thenReturn(5);
   }
 
   @Test
   public void shouldNotSendMessageWhenInitParamsAreNull() throws Exception {
     // Given
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(null, resourceBundleService, httpClient);
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(null, resourceBundleService, webNotificationService, httpClient);
 
     // When
     messagePublisher.send(new Message("", "", "", "", "", ""));
@@ -90,7 +95,7 @@ public class FCMMessagePublisherTest {
   public void shouldNotSendMessageWhenNoConfigFilePathParam() throws Exception {
     // Given
     InitParams initParams = new InitParams();
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient);
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, webNotificationService, httpClient);
 
     // When
     messagePublisher.send(new Message("", "", "", "", "", ""));
@@ -107,7 +112,7 @@ public class FCMMessagePublisherTest {
     serverKeyParam.setName("serviceAccountFilePath");
     serverKeyParam.setValue("fake.json");
     initParams.addParameter(serverKeyParam);
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient);
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, webNotificationService, httpClient);
 
     // When
     messagePublisher.send(new Message("", "", "", "", "", ""));
@@ -127,7 +132,7 @@ public class FCMMessagePublisherTest {
     serverKeyParam.setName("serviceAccountFilePath");
     serverKeyParam.setValue(this.getClass().getResource("/fcm-test.json").getPath());
     initParams.addParameter(serverKeyParam);
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, webNotificationService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -153,7 +158,7 @@ public class FCMMessagePublisherTest {
     HttpPost httpUriRequest = httpUriRequests.get(0);
     String body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
     JSONObject jsonMessage = new JSONObject(body);
-    assertEquals(false, jsonMessage.getBoolean("validate_only"));
+    assertFalse(jsonMessage.getBoolean("validate_only"));
     JSONObject message = jsonMessage.getJSONObject("message");
     JSONObject data = message.getJSONObject("data");
     assertEquals("My Notification Title", data.getString("title"));
@@ -167,7 +172,7 @@ public class FCMMessagePublisherTest {
     assertNotNull(httpUriRequest);
     body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
     jsonMessage = new JSONObject(body);
-    assertEquals(false, jsonMessage.getBoolean("validate_only"));
+    assertFalse(jsonMessage.getBoolean("validate_only"));
     message = jsonMessage.getJSONObject("message");
     JSONObject notification = message.getJSONObject("notification");
     assertEquals("My Notification Title", notification.getString("title"));
@@ -176,7 +181,14 @@ public class FCMMessagePublisherTest {
     assertEquals("http://notification.url/target", data.getString("url"));
     assertEquals("token2", message.getString("token"));
     assertFalse(message.has("android"));
-    assertFalse(message.has("apns"));
+    assertTrue(message.has("apns"));
+    JSONObject apns = message.getJSONObject("apns");
+    assertTrue(apns.has("payload"));
+    JSONObject payload = apns.getJSONObject("payload");
+    assertTrue(payload.has("aps"));
+    JSONObject aps = payload.getJSONObject("aps");
+    assertTrue(aps.has("badge"));
+    assertEquals(5, aps.getInt("badge"));
   }
 
   @Test
@@ -190,7 +202,7 @@ public class FCMMessagePublisherTest {
     serverKeyParam.setName("serviceAccountFilePath");
     serverKeyParam.setValue(this.getClass().getResource("/fcm-test.json").getPath());
     initParams.addParameter(serverKeyParam);
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, webNotificationService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -239,7 +251,14 @@ public class FCMMessagePublisherTest {
     assertEquals("http://notification.url/target", data.getString("url"));
     assertEquals("token2", message.getString("token"));
     assertFalse(message.has("android"));
-    assertFalse(message.has("apns"));
+    assertTrue(message.has("apns"));
+    JSONObject apns = message.getJSONObject("apns");
+    assertTrue(apns.has("payload"));
+    JSONObject payload = apns.getJSONObject("payload");
+    assertTrue(payload.has("aps"));
+    JSONObject aps = payload.getJSONObject("aps");
+    assertTrue(aps.has("badge"));
+    assertEquals(5, aps.getInt("badge"));
   }
 
   @Test
@@ -253,7 +272,7 @@ public class FCMMessagePublisherTest {
     serverKeyParam.setName("serviceAccountFilePath");
     serverKeyParam.setValue(this.getClass().getResource("/fcm-test.json").getPath());
     initParams.addParameter(serverKeyParam);
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, webNotificationService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -302,7 +321,14 @@ public class FCMMessagePublisherTest {
     assertEquals("http://notification.url/target", data.getString("url"));
     assertEquals("token2", message.getString("token"));
     assertFalse(message.has("android"));
-    assertFalse(message.has("apns"));
+    assertTrue(message.has("apns"));
+    JSONObject apns = message.getJSONObject("apns");
+    assertTrue(apns.has("payload"));
+    JSONObject payload = apns.getJSONObject("payload");
+    assertTrue(payload.has("aps"));
+    JSONObject aps = payload.getJSONObject("aps");
+    assertTrue(aps.has("badge"));
+    assertEquals(5, aps.getInt("badge"));
   }
 
 
@@ -317,7 +343,7 @@ public class FCMMessagePublisherTest {
     serverKeyParam.setName("serviceAccountFilePath");
     serverKeyParam.setValue(this.getClass().getResource("/fcm-test.json").getPath());
     initParams.addParameter(serverKeyParam);
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, webNotificationService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -348,7 +374,7 @@ public class FCMMessagePublisherTest {
             new BasicStatusLine(new ProtocolVersion("", 1, 2), HttpStatus.SC_OK, ""));
     when(httpClient.execute(any())).thenReturn(httpResponse);
     InitParams initParams = buildInitParams();
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, webNotificationService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -414,7 +440,7 @@ public class FCMMessagePublisherTest {
     when(httpResponse.getEntity()).thenReturn(httpEntity);
     when(httpClient.execute(any())).thenReturn(httpResponse);
     InitParams initParams = buildInitParams();
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, webNotificationService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -452,7 +478,7 @@ public class FCMMessagePublisherTest {
     when(httpResponse.getEntity()).thenReturn(httpEntity);
     when(httpClient.execute(any())).thenReturn(httpResponse);
     InitParams initParams = buildInitParams();
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, webNotificationService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);
@@ -501,7 +527,7 @@ public class FCMMessagePublisherTest {
     when(httpResponse.getEntity()).thenReturn(httpEntity);
     when(httpClient.execute(any())).thenReturn(httpResponse);
     InitParams initParams = buildInitParams();
-    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, httpClient) {
+    FCMMessagePublisher messagePublisher = new FCMMessagePublisher(initParams, resourceBundleService, webNotificationService, httpClient) {
       @Override
       protected PrivateKey getPrivateKeyFromPkcs8(String privateKeyPem) throws IOException {
         return mock(PrivateKey.class);

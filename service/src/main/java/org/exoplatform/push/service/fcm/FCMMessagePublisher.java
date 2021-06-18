@@ -33,6 +33,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.exoplatform.commons.api.notification.plugin.NotificationPluginUtils;
+import org.exoplatform.commons.api.notification.service.WebNotificationService;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
 import org.exoplatform.push.domain.Message;
@@ -68,6 +69,8 @@ public class FCMMessagePublisher implements MessagePublisher {
 
   private ResourceBundleService resourceBundleService;
 
+  private WebNotificationService webNotificationService;
+
   private CloseableHttpClient httpClient;
 
   private String fcmServiceAccountFilePath;
@@ -79,18 +82,18 @@ public class FCMMessagePublisher implements MessagePublisher {
   // How long (in seconds) the message should be kept in FCM storage if the device is offline
   private Integer fcmMessageExpirationTime = null;
 
-  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService) {
-    this(initParams, resourceBundleService, HttpClientBuilder.create().build());
+  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService, WebNotificationService webNotificationService) {
+    this(initParams, resourceBundleService, webNotificationService, HttpClientBuilder.create().build());
   }
 
-  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService, CloseableHttpClient httpClient) {
-    if(initParams != null) {
+  public FCMMessagePublisher(InitParams initParams, ResourceBundleService resourceBundleService, WebNotificationService webNotificationService, CloseableHttpClient httpClient) {
+    if (initParams != null) {
       // FCM configuration file
       ValueParam serviceAccountFilePathValueParam = initParams.getValueParam("serviceAccountFilePath");
-      if(serviceAccountFilePathValueParam != null) {
+      if (serviceAccountFilePathValueParam != null) {
         fcmServiceAccountFilePath = serviceAccountFilePathValueParam.getValue();
       }
-      if(StringUtils.isNotBlank(fcmServiceAccountFilePath)) {
+      if (StringUtils.isNotBlank(fcmServiceAccountFilePath)) {
         try {
           if (!fcmServiceAccountFilePath.startsWith("/")) {
             // relative path
@@ -116,7 +119,7 @@ public class FCMMessagePublisher implements MessagePublisher {
 
       // FCM message expiration
       ValueParam fcmMessageExpirationTimeValueParam = initParams.getValueParam("messageExpirationTime");
-      if(fcmMessageExpirationTimeValueParam != null && StringUtils.isNotBlank(fcmMessageExpirationTimeValueParam.getValue())) {
+      if (fcmMessageExpirationTimeValueParam != null && StringUtils.isNotBlank(fcmMessageExpirationTimeValueParam.getValue())) {
         try {
           fcmMessageExpirationTime = Integer.parseInt(fcmMessageExpirationTimeValueParam.getValue());
         } catch (NumberFormatException e) {
@@ -128,11 +131,12 @@ public class FCMMessagePublisher implements MessagePublisher {
 
     this.resourceBundleService = resourceBundleService;
     this.httpClient = httpClient;
+    this.webNotificationService = webNotificationService;
   }
 
   @Override
   public void send(Message message) throws Exception {
-    if(googleCredential == null) {
+    if (googleCredential == null) {
       return;
     }
 
@@ -147,36 +151,41 @@ public class FCMMessagePublisher implements MessagePublisher {
             .append("{")
             .append("  \"validate_only\": false,")
             .append("  \"message\": {");
-    if(StringUtils.isNotBlank(message.getDeviceType()) && message.getDeviceType().equals("android")) {
+    if (StringUtils.isNotBlank(message.getDeviceType()) && message.getDeviceType().equals("android")) {
       requestBody.append("    \"data\": {")
               .append("      \"title\": \"").append(message.getTitle().replaceAll("\"", "\\\\\"")).append("\",")
               .append("      \"body\": \"").append(messageBody).append("\",")
               .append("      \"url\": \"").append(message.getUrl()).append("\"")
               .append("    },");
+      if (fcmMessageExpirationTime != null) {
+        requestBody
+                .append("    \"android\": {")
+                .append("      \"ttl\": \"").append(fcmMessageExpirationTime).append("s\"")
+                .append("    },");
+      }
     } else {
       requestBody.append("    \"data\": {")
               .append("      \"url\": \"").append(message.getUrl()).append("\"")
               .append("    },")
               .append("    \"notification\": {")
-              .append("      \"title\": \"").append(message.getTitle().replaceAll("\\<[^>]*>","").replaceAll("\"", "\\\\\"")).append("\",")
-              .append("      \"body\": \"").append(messageBody.replaceAll("\\<[^>]*>","")).append("\"")
+              .append("      \"title\": \"").append(message.getTitle().replaceAll("\\<[^>]*>", "").replaceAll("\"", "\\\\\"")).append("\",")
+              .append("      \"body\": \"").append(messageBody.replaceAll("\\<[^>]*>", "")).append("\"")
               .append("    },");
-    }
-    if(fcmMessageExpirationTime != null && StringUtils.isNotBlank(message.getDeviceType())) {
-      if(message.getDeviceType().equals("android")) {
-        requestBody
-                .append("    \"android\": {")
-                .append("      \"ttl\": \"").append(fcmMessageExpirationTime).append("s\"")
-                .append("    },");
-      } else if(message.getDeviceType().equals("ios")) {
+      String expirationHeader = "";
+      if (fcmMessageExpirationTime != null) {
         Instant expirationInstant = Instant.now().minus(fcmMessageExpirationTime, ChronoUnit.SECONDS);
-        requestBody
-                .append("    \"apns\": {")
-                .append("      \"headers\": {")
-                .append("        \"apns-expiration\": \"").append(expirationInstant.getEpochSecond()).append("\"")
-                .append("      }")
-                .append("    },");
+        expirationHeader = "      \"headers\": {" +
+                "        \"apns-expiration\": \"" + expirationInstant.getEpochSecond() + "\"" +
+                "      },";
       }
+      requestBody.append("    \"apns\": {")
+              .append(expirationHeader)
+              .append("      \"payload\": {")
+              .append("        \"aps\": {")
+              .append("          \"badge\": ").append(webNotificationService.getNumberOnBadge(message.getReceiver()))
+              .append("        }")
+              .append("      }")
+              .append("    },");
     }
     requestBody.append("    \"token\":\"").append(message.getToken()).append("\"")
             .append("  }")
@@ -186,31 +195,31 @@ public class FCMMessagePublisher implements MessagePublisher {
 
     long startTimeSendingMessage = System.currentTimeMillis();
 
-    try(CloseableHttpResponse response = httpClient.execute(post)) {
+    try (CloseableHttpResponse response = httpClient.execute(post)) {
       long sendMessageExecutionTime = System.currentTimeMillis() - startTimeSendingMessage;
       if (response == null || response.getStatusLine() == null) {
         String errorMessage = "Error sending Push Notification, HTTP response or HTTP response code is null";
-        LOG.info("remote_service={} operation={} parameters=\"user:{},token:{},type:{}\" status=ko duration_ms={} error_msg=\"{}\"", 
-                      LOG_SERVICE_NAME, LOG_OPERATION_NAME, message.getReceiver(), StringUtil.mask(message.getToken(), 4),
-                      message.getDeviceType(), sendMessageExecutionTime, errorMessage);
+        LOG.info("remote_service={} operation={} parameters=\"user:{},token:{},type:{}\" status=ko duration_ms={} error_msg=\"{}\"",
+                LOG_SERVICE_NAME, LOG_OPERATION_NAME, message.getReceiver(), StringUtil.mask(message.getToken(), 4),
+                message.getDeviceType(), sendMessageExecutionTime, errorMessage);
         throw new Exception(errorMessage);
       } else if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
         String errorMessage = "Error sending Push Notification, response is " + response.getStatusLine().getStatusCode()
-                      + " - " + response.getStatusLine().getReasonPhrase();
-        LOG.info("remote_service={} operation={} parameters=\"user:{},token:{},type:{}\" status=ko status_code={} duration_ms={} error_msg=\"{}\"", 
-                      LOG_SERVICE_NAME, LOG_OPERATION_NAME, message.getReceiver(), StringUtil.mask(message.getToken(), 4),
-                      message.getDeviceType(), response.getStatusLine().getStatusCode(), sendMessageExecutionTime, errorMessage);
+                + " - " + response.getStatusLine().getReasonPhrase();
+        LOG.info("remote_service={} operation={} parameters=\"user:{},token:{},type:{}\" status=ko status_code={} duration_ms={} error_msg=\"{}\"",
+                LOG_SERVICE_NAME, LOG_OPERATION_NAME, message.getReceiver(), StringUtil.mask(message.getToken(), 4),
+                message.getDeviceType(), response.getStatusLine().getStatusCode(), sendMessageExecutionTime, errorMessage);
 
         // check if the token is invalid to throw a specific exception
-        if(isTokenInvalid(response)) {
+        if (isTokenInvalid(response)) {
           throw new InvalidTokenException(errorMessage);
         }
         // otherwise throw a general exception
         throw new Exception(errorMessage);
       } else {
-        LOG.info("remote_service={} operation={} parameters=\"user:{},token:{},type:{}\" status=ok duration_ms={}", 
-                      LOG_SERVICE_NAME, LOG_OPERATION_NAME, message.getReceiver(), StringUtil.mask(message.getToken(), 4),
-                      message.getDeviceType(), sendMessageExecutionTime);
+        LOG.info("remote_service={} operation={} parameters=\"user:{},token:{},type:{}\" status=ok duration_ms={}",
+                LOG_SERVICE_NAME, LOG_OPERATION_NAME, message.getReceiver(), StringUtil.mask(message.getToken(), 4),
+                message.getDeviceType(), sendMessageExecutionTime);
         LOG.info("Message sent to Firebase : username={}, token={}, type={}",
                 message.getReceiver(), StringUtil.mask(message.getToken(), 4), message.getDeviceType());
       }
@@ -221,13 +230,14 @@ public class FCMMessagePublisher implements MessagePublisher {
    * Process the notification message body:
    * * replace images by a text "inline image"
    * * escape double quotes
+   *
    * @param message The raw message body
    * @return The transformed message body
    */
   protected String processBody(Message message) {
     String language = NotificationPluginUtils.getLanguage(message.getReceiver());
     Locale locale;
-    if(StringUtils.isNotEmpty(language)) {
+    if (StringUtils.isNotEmpty(language)) {
       locale = new Locale(language);
     } else {
       locale = Locale.ENGLISH;
@@ -244,28 +254,29 @@ public class FCMMessagePublisher implements MessagePublisher {
 
   /**
    * Check if the response states that the token is invalid
+   *
    * @param response The HTTP response content
    * @return true if the token is invalid
    * @throws IOException
    */
   private boolean isTokenInvalid(CloseableHttpResponse response) throws IOException {
-    if(response.getStatusLine().getStatusCode() == HttpStatus.SC_BAD_REQUEST) {
+    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_BAD_REQUEST) {
       JacksonFactory jsonFactory = new JacksonFactory();
       JsonObjectParser parser = new JsonObjectParser(jsonFactory);
       FcmResponse responseContent = parser.parseAndClose(response.getEntity().getContent(), Charset.forName("UTF-8"), FcmResponse.class);
       FcmError error = responseContent.getError();
-      if(error != null) {
+      if (error != null) {
         String errorStatus = error.getStatus();
         if (errorStatus != null) {
           if (errorStatus.equals("UNREGISTERED")) {
             return true;
-          } else if(errorStatus.equals("INVALID_ARGUMENT")) {
+          } else if (errorStatus.equals("INVALID_ARGUMENT")) {
             List<FcmDetail> details = error.getDetails();
-            if(details != null) {
-              for(FcmDetail detail : details) {
+            if (details != null) {
+              for (FcmDetail detail : details) {
                 List<ArrayMap> fieldViolations = (List<ArrayMap>) detail.get("fieldViolations");
-                if(fieldViolations != null) {
-                  if(fieldViolations.stream()
+                if (fieldViolations != null) {
+                  if (fieldViolations.stream()
                           .anyMatch(fieldViolation -> fieldViolation.get("field") != null && fieldViolation.get("field").equals("message.token"))) {
                     return true;
                   }
@@ -297,10 +308,10 @@ public class FCMMessagePublisher implements MessagePublisher {
 
     GenericJson fileContents = parser.parseAndClose(fcmServiceAccountFile, Charset.forName("UTF-8"), GenericJson.class);
 
-    String clientId = (String)fileContents.get("client_id");
-    String clientEmail = (String)fileContents.get("client_email");
-    String privateKeyPem = (String)fileContents.get("private_key");
-    String privateKeyId = (String)fileContents.get("private_key_id");
+    String clientId = (String) fileContents.get("client_id");
+    String clientEmail = (String) fileContents.get("client_email");
+    String privateKeyPem = (String) fileContents.get("private_key");
+    String privateKeyId = (String) fileContents.get("private_key_id");
 
     if (clientId != null && clientEmail != null && privateKeyPem != null && privateKeyId != null) {
       FCMServiceAccountConfiguration fcmServiceAccountConfiguration = new FCMServiceAccountConfiguration();
@@ -309,12 +320,12 @@ public class FCMMessagePublisher implements MessagePublisher {
       fcmServiceAccountConfiguration.setServiceAccountPrivateKeyPem(privateKeyPem);
       fcmServiceAccountConfiguration.setServiceAccountPrivateKeyId(privateKeyId);
 
-      String projectId = (String)fileContents.get("project_id");
+      String projectId = (String) fileContents.get("project_id");
       if (projectId != null) {
         fcmServiceAccountConfiguration.setServiceAccountProjectId(projectId);
       }
 
-      String tokenUri = (String)fileContents.get("token_uri");
+      String tokenUri = (String) fileContents.get("token_uri");
       if (tokenUri != null) {
         fcmServiceAccountConfiguration.setTokenServerEncodedUrl(tokenUri);
       }
@@ -324,7 +335,6 @@ public class FCMMessagePublisher implements MessagePublisher {
       throw new IOException("Error reading service account configuration from file, expecting 'client_id', 'client_email', 'private_key' and 'private_key_id'.");
     }
   }
-
 
 
   /**
@@ -357,7 +367,7 @@ public class FCMMessagePublisher implements MessagePublisher {
       }
     }
 
-    if(setServiceAccountScopesMethod != null) {
+    if (setServiceAccountScopesMethod != null) {
       setServiceAccountScopesMethod.invoke(credentialBuilder, Collections.singletonList("https://www.googleapis.com/auth/firebase.messaging"));
     }
 
