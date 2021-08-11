@@ -59,11 +59,11 @@ import org.exoplatform.social.notification.plugin.*;
     @TemplateConfig(pluginId = PostActivitySpaceStreamPlugin.ID, template = "war:/push-notifications/templates/PostActivitySpaceStreamPlugin.gtmpl"),
     @TemplateConfig(pluginId = RelationshipReceivedRequestPlugin.ID, template = "war:/push-notifications/templates/RelationshipReceivedRequestPlugin.gtmpl"),
     @TemplateConfig(pluginId = RequestJoinSpacePlugin.ID, template = "war:/push-notifications/templates/RequestJoinSpacePlugin.gtmpl"),
-    @TemplateConfig(pluginId = SpaceInvitationPlugin.ID, template = "war:/push-notifications/templates/SpaceInvitationPlugin.gtmpl"),
-    @TemplateConfig(pluginId = MfaAdminRevocationRequestPlugin.ID, template = "war:/push-notifications/templates/MfaAdminRevocationRequestPlugin.gtmpl"),
+    @TemplateConfig(pluginId = SpaceInvitationPlugin.ID, template = "war:/push-notifications/templates/SpaceInvitationPlugin.gtmpl")
   }
 )
 public class PushTemplateProvider extends WebTemplateProvider {
+
 
   private final Map<PluginKey, AbstractTemplateBuilder> webTemplateBuilders = new HashMap<>();
 
@@ -280,24 +280,6 @@ public class PushTemplateProvider extends WebTemplateProvider {
     }
   };
 
-  /** Defines the template builder for MfaRevocationRequestPlugin*/
-  private AbstractTemplateBuilder mfaRevocationRequest = new AbstractTemplateBuilder() {
-
-    @Override
-    protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(MfaAdminRevocationRequestPlugin.ID)).buildMessage(ctx);
-
-      return messageInfo.subject(LinkProviderUtils.getMfaAdminURL()).end();
-    }
-
-    @Override
-    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-      return false;
-    }
-  };
-
-
-
   public PushTemplateProvider(InitParams initParams) {
     super(initParams);
     this.webTemplateBuilders.putAll(this.templateBuilders);
@@ -312,8 +294,6 @@ public class PushTemplateProvider extends WebTemplateProvider {
     this.templateBuilders.put(PluginKey.key(RelationshipReceivedRequestPlugin.ID), relationshipReceived);
     this.templateBuilders.put(PluginKey.key(RequestJoinSpacePlugin.ID), requestJoinSpace);
     this.templateBuilders.put(PluginKey.key(SpaceInvitationPlugin.ID), spaceInvitation);
-    this.templateBuilders.put(PluginKey.key(MfaAdminRevocationRequestPlugin.ID), mfaRevocationRequest);
-
   }
 
   /**
