@@ -35,7 +35,6 @@ import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
 import org.exoplatform.social.core.service.LinkProvider;
 import org.exoplatform.social.core.space.model.Space;
-import org.exoplatform.social.notification.LinkProviderUtils;
 import org.exoplatform.social.notification.Utils;
 import org.exoplatform.social.notification.channel.template.WebTemplateProvider;
 import org.exoplatform.social.notification.plugin.*;
@@ -59,11 +58,11 @@ import org.exoplatform.social.notification.plugin.*;
     @TemplateConfig(pluginId = PostActivitySpaceStreamPlugin.ID, template = "war:/push-notifications/templates/PostActivitySpaceStreamPlugin.gtmpl"),
     @TemplateConfig(pluginId = RelationshipReceivedRequestPlugin.ID, template = "war:/push-notifications/templates/RelationshipReceivedRequestPlugin.gtmpl"),
     @TemplateConfig(pluginId = RequestJoinSpacePlugin.ID, template = "war:/push-notifications/templates/RequestJoinSpacePlugin.gtmpl"),
-    @TemplateConfig(pluginId = SpaceInvitationPlugin.ID, template = "war:/push-notifications/templates/SpaceInvitationPlugin.gtmpl"),
-    @TemplateConfig(pluginId = MfaAdminRevocationRequestPlugin.ID, template = "war:/push-notifications/templates/MfaAdminRevocationRequestPlugin.gtmpl"),
+    @TemplateConfig(pluginId = SpaceInvitationPlugin.ID, template = "war:/push-notifications/templates/SpaceInvitationPlugin.gtmpl")
   }
 )
 public class PushTemplateProvider extends WebTemplateProvider {
+
 
   private final Map<PluginKey, AbstractTemplateBuilder> webTemplateBuilders = new HashMap<>();
 
@@ -280,24 +279,6 @@ public class PushTemplateProvider extends WebTemplateProvider {
     }
   };
 
-  /** Defines the template builder for MfaRevocationRequestPlugin*/
-  private AbstractTemplateBuilder mfaRevocationRequest = new AbstractTemplateBuilder() {
-
-    @Override
-    protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(MfaAdminRevocationRequestPlugin.ID)).buildMessage(ctx);
-
-      return messageInfo.subject(LinkProviderUtils.getMfaAdminURL()).end();
-    }
-
-    @Override
-    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-      return false;
-    }
-  };
-
-
-
   public PushTemplateProvider(InitParams initParams) {
     super(initParams);
     this.webTemplateBuilders.putAll(this.templateBuilders);
@@ -312,8 +293,6 @@ public class PushTemplateProvider extends WebTemplateProvider {
     this.templateBuilders.put(PluginKey.key(RelationshipReceivedRequestPlugin.ID), relationshipReceived);
     this.templateBuilders.put(PluginKey.key(RequestJoinSpacePlugin.ID), requestJoinSpace);
     this.templateBuilders.put(PluginKey.key(SpaceInvitationPlugin.ID), spaceInvitation);
-    this.templateBuilders.put(PluginKey.key(MfaAdminRevocationRequestPlugin.ID), mfaRevocationRequest);
-
   }
 
   /**
