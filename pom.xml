@@ -46,7 +46,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <!-- **************************************** -->
         <!-- Dependencies versions -->
         <!-- **************************************** -->
-        <org.exoplatform.social.version>6.2.x-SNAPSHOT</org.exoplatform.social.version>
+        <org.exoplatform.social.version>6.2.0-RC05</org.exoplatform.social.version>
     </properties>
     <dependencyManagement>
         <dependencies>
