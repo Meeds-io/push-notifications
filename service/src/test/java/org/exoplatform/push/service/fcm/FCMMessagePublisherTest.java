@@ -217,7 +217,13 @@ public class FCMMessagePublisherTest {
 
     // When
     messagePublisher.send(new Message("john", "token1", "android", "My <b>Notification</b> Title", "My Notification <div class=\"myclass\">Body</div>", "http://notification.url/target"));
-    messagePublisher.send(new Message("mary", "token2", "ios", "My <b>Notification</b> Title", "My Notification <div class=\"myclass\">Body</div>", "http://notification.url/target"));
+    messagePublisher.send(new Message("mary", "token2", "ios", "My <b>Notification</b> Title",
+            "\n" +
+                    "\n" +
+                    "My Notification \n" +
+                    "\n" +
+                    "<div class=\"myclass\">Body</div>",
+            "http://notification.url/target"));
 
     // Then
     verify(httpClient, times(2)).execute(reqArgs.capture());
@@ -241,7 +247,7 @@ public class FCMMessagePublisherTest {
     httpUriRequest = httpUriRequests.get(1);
     assertNotNull(httpUriRequest);
     body = IOUtils.toString(httpUriRequest.getEntity().getContent(), "UTF-8");
-    jsonMessage = new JSONObject(body);
+    jsonMessage = new JSONObject(body.replaceAll("\\n", "\\\\n"));
     assertEquals(false, jsonMessage.getBoolean("validate_only"));
     message = jsonMessage.getJSONObject("message");
     JSONObject notification = message.getJSONObject("notification");
