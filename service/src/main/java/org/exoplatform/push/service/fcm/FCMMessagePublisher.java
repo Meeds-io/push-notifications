@@ -169,7 +169,7 @@ public class FCMMessagePublisher implements MessagePublisher {
               .append("    },")
               .append("    \"notification\": {")
               .append("      \"title\": \"").append(message.getTitle().replaceAll("\\<[^>]*>", "").replaceAll("\"", "\\\\\"")).append("\",")
-              .append("      \"body\": \"").append(messageBody.replaceAll("\\<[^>]*>", "")).append("\"")
+              .append("      \"body\": \"").append(messageBody.replaceAll("\\<[^>]*>|\\n", "").trim()).append("\"")
               .append("    },");
       String expirationHeader = "";
       if (fcmMessageExpirationTime != null) {
