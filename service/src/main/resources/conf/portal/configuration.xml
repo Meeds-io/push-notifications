@@ -89,7 +89,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
           <property name="groupName" value="Messaging"/>
           <property name="job" value="org.exoplatform.push.job.ExpiredTokensCleanerJob"/>
           <property name="repeatCount" value="0"/>
-          <property name="period" value="${exo.messaging.token.cleaner.job.period:86400000}"/>
+          <property name="period" value="${exo.messaging.token.cleaner.job.period:28800000}"/> <!-- Job period is 8 hours -->
           <property name="startTime" value="+60000"/><!-- start after 1 minute delay -->
           <property name="endTime" value=""/>
         </properties-param>
