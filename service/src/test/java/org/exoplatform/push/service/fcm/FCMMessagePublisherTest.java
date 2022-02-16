@@ -176,7 +176,7 @@ public class FCMMessagePublisherTest {
     message = jsonMessage.getJSONObject("message");
     JSONObject notification = message.getJSONObject("notification");
     assertEquals("My Notification Title", notification.getString("title"));
-    assertEquals("My Notification Body", notification.getString("body"));
+    assertEquals(" My Notification Body", notification.getString("body"));
     data = message.getJSONObject("data");
     assertEquals("http://notification.url/target", data.getString("url"));
     assertEquals("token2", message.getString("token"));
@@ -252,7 +252,7 @@ public class FCMMessagePublisherTest {
     message = jsonMessage.getJSONObject("message");
     JSONObject notification = message.getJSONObject("notification");
     assertEquals("My Notification Title", notification.getString("title"));
-    assertEquals("My Notification Body", notification.getString("body"));
+    assertEquals(" My Notification Body", notification.getString("body"));
     data = message.getJSONObject("data");
     assertEquals("http://notification.url/target", data.getString("url"));
     assertEquals("token2", message.getString("token"));
@@ -322,7 +322,7 @@ public class FCMMessagePublisherTest {
     message = jsonMessage.getJSONObject("message");
     JSONObject notification = message.getJSONObject("notification");
     assertEquals("My Notification Title", notification.getString("title"));
-    assertEquals("My Notification Text  [inline image]  Text", notification.getString("body"));
+    assertEquals(" My Notification Text  [inline image]  Text", notification.getString("body"));
     data = message.getJSONObject("data");
     assertEquals("http://notification.url/target", data.getString("url"));
     assertEquals("token2", message.getString("token"));
@@ -423,7 +423,7 @@ public class FCMMessagePublisherTest {
     message = jsonMessage.getJSONObject("message");
     notification = message.getJSONObject("notification");
     assertEquals("My Notification Title", notification.getString("title"));
-    assertEquals("My Notification Body", notification.getString("body"));
+    assertEquals(" My Notification Body", notification.getString("body"));
     assertEquals("token2", message.getString("token"));
     JSONObject ios = message.getJSONObject("apns");
     assertEquals("60s", android.getString("ttl"));
