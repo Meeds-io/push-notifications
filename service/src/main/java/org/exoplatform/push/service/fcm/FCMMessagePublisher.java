@@ -44,6 +44,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.resources.ResourceBundleService;
 import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
+import org.jsoup.Jsoup;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -66,7 +67,6 @@ public class FCMMessagePublisher implements MessagePublisher {
 
   public final static String LOG_SERVICE_NAME = "firebase-cloud-messaging";
   public final static String LOG_OPERATION_NAME = "send-push-notification";
-
   private ResourceBundleService resourceBundleService;
 
   private WebNotificationService webNotificationService;
@@ -169,7 +169,7 @@ public class FCMMessagePublisher implements MessagePublisher {
               .append("    },")
               .append("    \"notification\": {")
               .append("      \"title\": \"").append(message.getTitle().replaceAll("\\<[^>]*>", "").replaceAll("\"", "\\\\\"")).append("\",")
-              .append("      \"body\": \"").append(messageBody.replaceAll("\\<[^>]*>|\\n", "").trim()).append("\"")
+              .append("      \"body\": \"").append((Jsoup.parse(messageBody).wholeText()).trim()).append("\"")
               .append("    },");
       String expirationHeader = "";
       if (fcmMessageExpirationTime != null) {

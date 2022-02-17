@@ -252,7 +252,7 @@ public class FCMMessagePublisherTest {
     message = jsonMessage.getJSONObject("message");
     JSONObject notification = message.getJSONObject("notification");
     assertEquals("My Notification Title", notification.getString("title"));
-    assertEquals("My Notification Body", notification.getString("body"));
+    assertEquals("My Notification \n\nBody", notification.getString("body"));
     data = message.getJSONObject("data");
     assertEquals("http://notification.url/target", data.getString("url"));
     assertEquals("token2", message.getString("token"));
