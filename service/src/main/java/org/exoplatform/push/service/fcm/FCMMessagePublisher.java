@@ -230,13 +230,13 @@ public class FCMMessagePublisher implements MessagePublisher {
    *Conserve line breaks of br and p elements in a html document 
    */
   protected String convertHtml(String html) {
-	  	if(html==null)
-	        return html;
-	  	Document document = Jsoup.parse(html);
-	    document.outputSettings(new Document.OutputSettings().prettyPrint(false));
-	    document.select("br").append("\\n");
-	    document.select("p").prepend("\\n\\n");
-	    return document.html().replaceAll("\\\\n", "\n");
+	if(html==null)
+	    return html;
+	Document document = Jsoup.parse(html);
+	document.outputSettings(new Document.OutputSettings().prettyPrint(false));
+	document.select("br").append("\\n");
+	document.select("p").prepend("\\n\\n");
+	return document.html();
   }
 
   /**
