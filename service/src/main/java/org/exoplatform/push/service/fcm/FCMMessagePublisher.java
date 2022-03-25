@@ -45,6 +45,7 @@ import org.exoplatform.services.log.Log;
 import org.exoplatform.services.resources.ResourceBundleService;
 import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -169,7 +170,7 @@ public class FCMMessagePublisher implements MessagePublisher {
               .append("    },")
               .append("    \"notification\": {")
               .append("      \"title\": \"").append(message.getTitle().replaceAll("\\<[^>]*>", "").replaceAll("\"", "\\\\\"")).append("\",")
-              .append("      \"body\": \"").append((Jsoup.parse(messageBody).wholeText()).trim()).append("\"")
+              .append("      \"body\": \"").append((Jsoup.parse(convertHtml(messageBody)).wholeText()).trim()).append("\"")
               .append("    },");
       String expirationHeader = "";
       if (fcmMessageExpirationTime != null) {
@@ -224,6 +225,18 @@ public class FCMMessagePublisher implements MessagePublisher {
                 message.getReceiver(), StringUtil.mask(message.getToken(), 4), message.getDeviceType());
       }
     }
+  }
+  /**
+   *Conserve line breaks of br and p elements in a html document 
+   */
+  protected String convertHtml(String html) {
+	if(html==null)
+	    return html;
+	Document document = Jsoup.parse(html);
+	document.outputSettings(new Document.OutputSettings().prettyPrint(false));
+	document.select("br").append("\\n");
+	document.select("p").prepend("\\n\\n");
+	return document.html();
   }
 
   /**
