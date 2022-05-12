@@ -17,6 +17,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <%
   String message = (STATUS == "ACCEPTED") ?
           _ctx.appRes("Notification.intranet.message.accept.SpaceInvitationPlugin", SPACE)
-          : _ctx.appRes("Notification.intranet.message.SpaceInvitationPlugin", SPACE);
+          : _ctx.appRes("Notification.intranet.message.SpaceInvitationPlugin", SENDER_NAME, SPACE);
 %>
 $message
