@@ -16,7 +16,13 @@
  */
 package org.exoplatform.push.rest;
 
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang.StringUtils;
 import org.exoplatform.portal.config.UserACL;
 import org.exoplatform.push.domain.Device;
@@ -30,7 +36,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("/v1/messaging/device")
-@Api(tags = "/v1/messaging/device", value = "/v1/messaging/device", description = "Managing devices for Push Notifications")
+@Tag(name = "/v1/messaging/device", description = "Managing devices for Push Notifications")
 public class DeviceRestService implements ResourceContainer {
 
   private DeviceService deviceService;
@@ -45,16 +51,15 @@ public class DeviceRestService implements ResourceContainer {
   @GET
   @Path("{token}")
   @RolesAllowed("users")
-  @ApiOperation(value = "Gets a device by token",
-          httpMethod = "GET",
-          response = Response.class,
-          notes = "This returns the device in the following cases: <br/><ul><li>the owner of the device is the authenticated user</li><li>the authenticated user is the super user</li></ul>")
+  @Operation(summary = "Gets a device by token",
+          method = "GET",
+          description = "This returns the device in the following cases: <br/><ul><li>the owner of the device is the authenticated user</li><li>the authenticated user is the super user</li></ul>")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Device returned"),
-          @ApiResponse (code = 400, message = "Invalid query input - token is not valid"),
-          @ApiResponse (code = 401, message = "Not authorized to get the device linked to the token"),
-          @ApiResponse (code = 500, message = "Internal server error")})
-  public Response getDevice(@ApiParam(value = "Token", required = true) @PathParam("token") String token) {
+          @ApiResponse(responseCode = "200", description = "Device returned"),
+          @ApiResponse (responseCode = "400", description = "Invalid query input - token is not valid"),
+          @ApiResponse (responseCode = "401", description = "Not authorized to get the device linked to the token"),
+          @ApiResponse (responseCode = "500", description = "Internal server error")})
+  public Response getDevice(@Parameter(description = "Token", required = true) @PathParam("token") String token) {
     if(StringUtils.isBlank(token)) {
       throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
@@ -82,16 +87,15 @@ public class DeviceRestService implements ResourceContainer {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @RolesAllowed("users")
-  @ApiOperation(value = "Creates or updates a device",
-          httpMethod = "POST",
-          response = Response.class,
-          notes = "This creates or updates the device in the following cases: <br/><ul><li>the owner of the device is the authenticated user</li><li>the authenticated user is the super user</li></ul>")
+  @Operation(summary = "Creates or updates a device",
+          method = "POST",
+          description = "This creates or updates the device in the following cases: <br/><ul><li>the owner of the device is the authenticated user</li><li>the authenticated user is the super user</li></ul>")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Device created"),
-          @ApiResponse (code = 400, message = "Invalid query input"),
-          @ApiResponse (code = 401, message = "Not authorized to create the device"),
-          @ApiResponse (code = 500, message = "Internal server error")})
-  public Response saveDevice(@ApiParam(value = "Device", required = true) Device device) {
+          @ApiResponse(responseCode = "200", description = "Device created"),
+          @ApiResponse (responseCode = "400", description = "Invalid query input"),
+          @ApiResponse (responseCode = "401", description = "Not authorized to create the device"),
+          @ApiResponse (responseCode = "500", description = "Internal server error")})
+  public Response saveDevice(@Parameter(description = "Device", required = true) Device device) {
     if(device == null || StringUtils.isBlank(device.getToken()) || StringUtils.isBlank(device.getUsername())) {
       throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
@@ -114,16 +118,15 @@ public class DeviceRestService implements ResourceContainer {
   @DELETE
   @Path("{token}")
   @RolesAllowed("users")
-  @ApiOperation(value = "Deletes a device",
-          httpMethod = "DELETE",
-          response = Response.class,
-          notes = "This deletes the device in the following cases: <br/><ul><li>the owner of the device is the authenticated user</li><li>the authenticated user is the super user</li></ul>")
+  @Operation(summary = "Deletes a device",
+          method = "DELETE",
+          description = "This deletes the device in the following cases: <br/><ul><li>the owner of the device is the authenticated user</li><li>the authenticated user is the super user</li></ul>")
   @ApiResponses(value = {
-          @ApiResponse(code = 200, message = "Device deleted"),
-          @ApiResponse (code = 400, message = "Invalid query input"),
-          @ApiResponse (code = 401, message = "Not authorized to delete the device"),
-          @ApiResponse (code = 500, message = "Internal server error")})
-  public Response deleteDevice(@ApiParam(value = "Token", required = true) @PathParam("token") String token) {
+          @ApiResponse(responseCode = "200", description = "Device deleted"),
+          @ApiResponse (responseCode = "400", description = "Invalid query input"),
+          @ApiResponse (responseCode = "401", description = "Not authorized to delete the device"),
+          @ApiResponse (responseCode = "500", description = "Internal server error")})
+  public Response deleteDevice(@Parameter(description = "Token", required = true) @PathParam("token") String token) {
     if(StringUtils.isBlank(token)) {
       throw new WebApplicationException(Response.Status.BAD_REQUEST);
     }
