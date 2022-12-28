@@ -47,6 +47,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.exoplatform.social</groupId>
+            <artifactId>social-component-oauth-auth</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
             <scope>provided</scope>
