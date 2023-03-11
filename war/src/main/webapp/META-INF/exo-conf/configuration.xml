@@ -41,7 +41,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <field name="dependencies">
               <collection type="java.util.ArrayList">
                 <value>
-                  <string>exo-push-notifications</string>
+                  <string>push-notifications</string>
                 </value>
               </collection>
             </field>

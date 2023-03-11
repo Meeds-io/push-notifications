@@ -42,7 +42,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <includes>
                 <include>org.exoplatform.addons.push-notifications:exo-push-notifications-webapp:war</include>
             </includes>
-            <outputFileNameMapping>exo-push-notifications.war</outputFileNameMapping>
+            <outputFileNameMapping>push-notifications.war</outputFileNameMapping>
         </dependencySet>
     </dependencySets>
 </assembly>
