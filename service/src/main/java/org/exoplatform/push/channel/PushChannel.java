@@ -24,6 +24,7 @@ import org.exoplatform.commons.api.notification.model.ChannelKey;
 import org.exoplatform.commons.api.notification.model.MessageInfo;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
+import org.exoplatform.portal.branding.BrandingService;
 import org.exoplatform.push.domain.Device;
 import org.exoplatform.push.domain.Message;
 import org.exoplatform.push.exception.InvalidTokenException;
@@ -46,8 +47,6 @@ public class PushChannel extends AbstractChannel {
   public final static String LOG_SERVICE_NAME = "notifications";
   public final static String LOG_OPERATION_NAME = "send-push-notification";
 
-  public String notificationTitle;
-
   private final ChannelKey key = ChannelKey.key(ID);
 
   private final Map<PluginKey, String> templateFilePaths = new HashMap<PluginKey, String>();
@@ -57,12 +56,12 @@ public class PushChannel extends AbstractChannel {
   private MessagePublisher messagePublisher;
 
   private DeviceService deviceService;
+  private BrandingService brandingService;
 
-  public PushChannel(MessagePublisher messagePublisher, DeviceService deviceService) {
+  public PushChannel(MessagePublisher messagePublisher, DeviceService deviceService, BrandingService brandingService) {
     this.messagePublisher = messagePublisher;
     this.deviceService = deviceService;
-
-    this.notificationTitle = System.getProperty("exo.notifications.portalname");
+    this.brandingService = brandingService;
   }
 
   @Override
@@ -95,7 +94,7 @@ public class PushChannel extends AbstractChannel {
               String maskedToken = StringUtil.mask(device.getToken(), 4);
               LOG.info("Sending push notification to user {} (token={})",
                       userId, maskedToken);
-              Message message = new Message(userId, device.getToken(), device.getType(), notificationTitle, messageInfo.getBody(), messageInfo.getSubject());
+              Message message = new Message(userId, device.getToken(), device.getType(), brandingService.getCompanyName(), messageInfo.getBody(), messageInfo.getSubject());
               messagePublisher.send(message);
               long sendMessageExecutionTime = System.currentTimeMillis() - startTimeSendingMessage;
               LOG.info("service={} operation={} parameters=\"user:{},token:{},type:{},pluginId:{}\" status=ok duration_ms={}", 

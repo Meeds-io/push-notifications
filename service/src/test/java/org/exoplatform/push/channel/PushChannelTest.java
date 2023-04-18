@@ -19,6 +19,7 @@ package org.exoplatform.push.channel;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
+import org.exoplatform.portal.branding.BrandingService;
 import org.exoplatform.push.domain.Device;
 import org.exoplatform.push.domain.Message;
 import org.exoplatform.push.exception.InvalidTokenException;
@@ -43,13 +44,14 @@ public class PushChannelTest {
     // Given
     MessagePublisher messagePublisher = mock(FCMLegacyAPIMessagePublisher.class);
     DeviceService deviceService = mock(DeviceService.class);
+    BrandingService brandingService = mock(BrandingService.class);
     NotificationContext ctx = mock(NotificationContext.class);
     NotificationInfo notificationInfo = mock(NotificationInfo.class);
     when(notificationInfo.getKey()).thenReturn(new PluginKey("pluginId"));
     when(ctx.getNotificationInfo()).thenReturn(notificationInfo);
     when(deviceService.getDevicesByUser(anyString())).thenReturn(null);
 
-    PushChannel pushChannel = new PushChannel(messagePublisher, deviceService);
+    PushChannel pushChannel = new PushChannel(messagePublisher, deviceService, brandingService);
 
     // When
     pushChannel.dispatch(ctx, "john");
@@ -64,12 +66,13 @@ public class PushChannelTest {
     MessagePublisher messagePublisher = mock(FCMLegacyAPIMessagePublisher.class);
     DeviceService deviceService = mock(DeviceService.class);
     NotificationContext ctx = mock(NotificationContext.class);
+    BrandingService brandingService = mock(BrandingService.class);
     NotificationInfo notificationInfo = mock(NotificationInfo.class);
     when(notificationInfo.getKey()).thenReturn(new PluginKey("pluginId"));
     when(ctx.getNotificationInfo()).thenReturn(notificationInfo);
     when(deviceService.getDevicesByUser(anyString())).thenReturn(new ArrayList<>());
 
-    PushChannel pushChannel = new PushChannel(messagePublisher, deviceService);
+    PushChannel pushChannel = new PushChannel(messagePublisher, deviceService, brandingService);
 
     // When
     pushChannel.dispatch(ctx, "john");
@@ -84,12 +87,13 @@ public class PushChannelTest {
     MessagePublisher messagePublisher = mock(FCMLegacyAPIMessagePublisher.class);
     DeviceService deviceService = mock(DeviceService.class);
     NotificationContext ctx = mock(NotificationContext.class);
+    BrandingService brandingService = mock(BrandingService.class);
     NotificationInfo notificationInfo = mock(NotificationInfo.class);
     when(notificationInfo.getKey()).thenReturn(new PluginKey("pluginId"));
     when(ctx.getNotificationInfo()).thenReturn(notificationInfo);
     when(deviceService.getDevicesByUser(anyString())).thenReturn(Arrays.asList(new Device(), new Device()));
 
-    PushChannel pushChannel = new PushChannel(messagePublisher, deviceService);
+    PushChannel pushChannel = new PushChannel(messagePublisher, deviceService, brandingService);
 
     ArgumentCaptor<Message> messageArgs = ArgumentCaptor.forClass(Message.class);
 
@@ -109,6 +113,7 @@ public class PushChannelTest {
     MessagePublisher messagePublisher = mock(FCMLegacyAPIMessagePublisher.class);
     DeviceService deviceService = mock(DeviceService.class);
     NotificationContext ctx = mock(NotificationContext.class);
+    BrandingService brandingService = mock(BrandingService.class);
     NotificationInfo notificationInfo = mock(NotificationInfo.class);
     doThrow(new InvalidTokenException()).when(messagePublisher).send(any(Message.class));
     when(notificationInfo.getKey()).thenReturn(new PluginKey("pluginId"));
@@ -117,7 +122,7 @@ public class PushChannelTest {
     device.setToken("token1");
     when(deviceService.getDevicesByUser(anyString())).thenReturn(Arrays.asList(device));
 
-    PushChannel pushChannel = new PushChannel(messagePublisher, deviceService);
+    PushChannel pushChannel = new PushChannel(messagePublisher, deviceService, brandingService);
 
     // When
     pushChannel.dispatch(ctx, "john");
