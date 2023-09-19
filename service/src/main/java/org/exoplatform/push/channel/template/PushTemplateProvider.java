@@ -25,6 +25,7 @@ import org.exoplatform.commons.api.notification.NotificationMessageUtils;
 import org.exoplatform.commons.api.notification.annotation.TemplateConfig;
 import org.exoplatform.commons.api.notification.annotation.TemplateConfigs;
 import org.exoplatform.commons.api.notification.channel.template.AbstractTemplateBuilder;
+import org.exoplatform.commons.api.notification.channel.template.TemplateProvider;
 import org.exoplatform.commons.api.notification.model.MessageInfo;
 import org.exoplatform.commons.api.notification.model.NotificationInfo;
 import org.exoplatform.commons.api.notification.model.PluginKey;
@@ -36,8 +37,18 @@ import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvide
 import org.exoplatform.social.core.service.LinkProvider;
 import org.exoplatform.social.core.space.model.Space;
 import org.exoplatform.social.notification.Utils;
-import org.exoplatform.social.notification.channel.template.WebTemplateProvider;
-import org.exoplatform.social.notification.plugin.*;
+import org.exoplatform.social.notification.plugin.ActivityCommentPlugin;
+import org.exoplatform.social.notification.plugin.ActivityMentionPlugin;
+import org.exoplatform.social.notification.plugin.ActivityReplyToCommentPlugin;
+import org.exoplatform.social.notification.plugin.LikeCommentPlugin;
+import org.exoplatform.social.notification.plugin.LikePlugin;
+import org.exoplatform.social.notification.plugin.NewUserPlugin;
+import org.exoplatform.social.notification.plugin.PostActivityPlugin;
+import org.exoplatform.social.notification.plugin.PostActivitySpaceStreamPlugin;
+import org.exoplatform.social.notification.plugin.RelationshipReceivedRequestPlugin;
+import org.exoplatform.social.notification.plugin.RequestJoinSpacePlugin;
+import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
+import org.exoplatform.social.notification.plugin.SpaceInvitationPlugin;
 
 /**
  * Templates for Push Notifications.
@@ -61,17 +72,16 @@ import org.exoplatform.social.notification.plugin.*;
     @TemplateConfig(pluginId = SpaceInvitationPlugin.ID, template = "war:/push-notifications/templates/SpaceInvitationPlugin.gtmpl")
   }
 )
-public class PushTemplateProvider extends WebTemplateProvider {
+public class PushTemplateProvider extends TemplateProvider {
 
-
-  private final Map<PluginKey, AbstractTemplateBuilder> webTemplateBuilders = new HashMap<>();
+  private final Map<PluginKey, AbstractTemplateBuilder> templateBuilders = new HashMap<>();
 
   /** Defines the template builder for ActivityCommentPlugin*/
   private AbstractTemplateBuilder comment = new AbstractTemplateBuilder() {
 
     @Override
     protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(ActivityCommentPlugin.ID)).buildMessage(ctx);
+      MessageInfo messageInfo = templateBuilders.get(new PluginKey(ActivityCommentPlugin.ID)).buildMessage(ctx);
 
       NotificationInfo notification = ctx.getNotificationInfo();
       boolean notHighLightComment = Boolean.valueOf(notification.getValueOwnerParameter(NotificationMessageUtils.NOT_HIGHLIGHT_COMMENT_PORPERTY.getKey()));
@@ -103,7 +113,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
 
     @Override
     protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(ActivityReplyToCommentPlugin.ID)).buildMessage(ctx);
+      MessageInfo messageInfo = templateBuilders.get(new PluginKey(ActivityReplyToCommentPlugin.ID)).buildMessage(ctx);
 
       NotificationInfo notification = ctx.getNotificationInfo();
       boolean notHighLightComment = Boolean.valueOf(notification.getValueOwnerParameter(NotificationMessageUtils.NOT_HIGHLIGHT_COMMENT_PORPERTY.getKey()));
@@ -126,7 +136,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
 
     @Override
     protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(ActivityMentionPlugin.ID)).buildMessage(ctx);
+      MessageInfo messageInfo = templateBuilders.get(new PluginKey(ActivityMentionPlugin.ID)).buildMessage(ctx);
 
       return messageInfo.subject(getActivityUrl(ctx)).end();
     }
@@ -142,7 +152,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
 
     @Override
     protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(LikePlugin.ID)).buildMessage(ctx);
+      MessageInfo messageInfo = templateBuilders.get(new PluginKey(LikePlugin.ID)).buildMessage(ctx);
 
       return messageInfo.subject(getActivityUrl(ctx)).end();
     }
@@ -158,7 +168,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
 
     @Override
     protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(LikeCommentPlugin.ID)).buildMessage(ctx);
+      MessageInfo messageInfo = templateBuilders.get(new PluginKey(LikeCommentPlugin.ID)).buildMessage(ctx);
 
       return messageInfo.subject(getActivityUrl(ctx)).end();
     }
@@ -174,7 +184,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
 
     @Override
     protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(NewUserPlugin.ID)).buildMessage(ctx);
+      MessageInfo messageInfo = templateBuilders.get(new PluginKey(NewUserPlugin.ID)).buildMessage(ctx);
 
       NotificationInfo notification = ctx.getNotificationInfo();
       String remoteId = notification.getValueOwnerParameter(SocialNotificationUtils.REMOTE_ID.getKey());
@@ -195,7 +205,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
 
     @Override
     protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(PostActivityPlugin.ID)).buildMessage(ctx);
+      MessageInfo messageInfo = templateBuilders.get(new PluginKey(PostActivityPlugin.ID)).buildMessage(ctx);
 
       return messageInfo.subject(getActivityUrl(ctx)).end();
     }
@@ -212,7 +222,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
 
     @Override
     protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(PostActivitySpaceStreamPlugin.ID)).buildMessage(ctx);
+      MessageInfo messageInfo = templateBuilders.get(new PluginKey(PostActivitySpaceStreamPlugin.ID)).buildMessage(ctx);
 
       return messageInfo.subject(getActivityUrl(ctx)).end();
     }
@@ -228,7 +238,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
   private AbstractTemplateBuilder relationshipReceived = new AbstractTemplateBuilder() {
     @Override
     protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(RelationshipReceivedRequestPlugin.ID)).buildMessage(ctx);
+      MessageInfo messageInfo = templateBuilders.get(new PluginKey(RelationshipReceivedRequestPlugin.ID)).buildMessage(ctx);
 
       NotificationInfo notification = ctx.getNotificationInfo();
       String sender = notification.getValueOwnerParameter("sender");
@@ -252,7 +262,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
 
     @Override
     protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(RequestJoinSpacePlugin.ID)).buildMessage(ctx);
+      MessageInfo messageInfo = templateBuilders.get(new PluginKey(RequestJoinSpacePlugin.ID)).buildMessage(ctx);
 
       return messageInfo.subject(getSpaceUrl(ctx)).end();
     }
@@ -268,7 +278,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
 
     @Override
     protected MessageInfo makeMessage(NotificationContext ctx) {
-      MessageInfo messageInfo = webTemplateBuilders.get(new PluginKey(SpaceInvitationPlugin.ID)).buildMessage(ctx);
+      MessageInfo messageInfo = templateBuilders.get(new PluginKey(SpaceInvitationPlugin.ID)).buildMessage(ctx);
 
       return messageInfo.subject(getSpaceUrl(ctx)).end();
     }
@@ -281,7 +291,7 @@ public class PushTemplateProvider extends WebTemplateProvider {
 
   public PushTemplateProvider(InitParams initParams) {
     super(initParams);
-    this.webTemplateBuilders.putAll(this.templateBuilders);
+    this.templateBuilders.putAll(this.templateBuilders);
     this.templateBuilders.put(PluginKey.key(ActivityCommentPlugin.ID), comment);
     this.templateBuilders.put(PluginKey.key(ActivityReplyToCommentPlugin.ID), replyToComment);
     this.templateBuilders.put(PluginKey.key(ActivityMentionPlugin.ID), mention);
