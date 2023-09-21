@@ -17,8 +17,6 @@
 package org.exoplatform.push.channel.template;
 
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.NotificationMessageUtils;
@@ -73,8 +71,6 @@ import org.exoplatform.social.notification.plugin.SpaceInvitationPlugin;
   }
 )
 public class PushTemplateProvider extends TemplateProvider {
-
-  private final Map<PluginKey, AbstractTemplateBuilder> templateBuilders = new HashMap<>();
 
   /** Defines the template builder for ActivityCommentPlugin*/
   private AbstractTemplateBuilder comment = new AbstractTemplateBuilder() {
@@ -291,7 +287,6 @@ public class PushTemplateProvider extends TemplateProvider {
 
   public PushTemplateProvider(InitParams initParams) {
     super(initParams);
-    this.templateBuilders.putAll(this.templateBuilders);
     this.templateBuilders.put(PluginKey.key(ActivityCommentPlugin.ID), comment);
     this.templateBuilders.put(PluginKey.key(ActivityReplyToCommentPlugin.ID), replyToComment);
     this.templateBuilders.put(PluginKey.key(ActivityMentionPlugin.ID), mention);
