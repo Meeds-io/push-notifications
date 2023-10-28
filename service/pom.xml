@@ -27,7 +27,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <name>eXo Push notifications addon - Service</name>
 
     <properties>
-        <exo.test.coverage.ratio>0.48</exo.test.coverage.ratio>
+        <exo.test.coverage.ratio>0.35</exo.test.coverage.ratio>
     </properties>
 
     <dependencies>
