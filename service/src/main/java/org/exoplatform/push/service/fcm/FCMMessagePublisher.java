@@ -34,6 +34,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.exoplatform.commons.api.notification.plugin.NotificationPluginUtils;
 import org.exoplatform.commons.api.notification.service.WebNotificationService;
+import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
 import org.exoplatform.push.domain.Message;
@@ -147,6 +148,9 @@ public class FCMMessagePublisher implements MessagePublisher {
     post.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
 
     String messageBody = processBody(message);
+    if(StringUtils.isEmpty(message.getUrl())) {
+      message.setUrl(CommonsUtils.getCurrentDomain());
+    }
 
     StringBuilder requestBody = new StringBuilder()
             .append("{")
