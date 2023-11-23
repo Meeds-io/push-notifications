@@ -174,14 +174,15 @@ public class PushTemplateProvider extends TemplateProvider {
       }
       //
       boolean notHighLightComment = Boolean.parseBoolean(notification.getValueOwnerParameter(NotificationMessageUtils.NOT_HIGHLIGHT_COMMENT_PORPERTY.getKey()));
-      templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", LinkProvider.getSingleActivityUrl(notHighLightComment ?  activity.getId() : activity.getId() + "#comment-" + commentActivity.getId()));
+      String notificationLink =  CommonsUtils.getCurrentDomain() + LinkProvider.getSingleActivityUrl(notHighLightComment ?  activity.getId() : activity.getId() + "#comment-" + commentActivity.getId());
+      templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", notificationLink);
 
       //
       String body = TemplateUtils.processGroovy(templateContext);
       //binding the exception throws by processing template
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
-      return messageInfo.body(body).end();
+      return messageInfo.body(body).subject(notificationLink).end();
     }
 
     private String cutStringByMaxLength(String st, int maxLength) {
@@ -346,14 +347,15 @@ public class PushTemplateProvider extends TemplateProvider {
       }
       //
 
-      templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", LinkProvider.getSingleActivityUrl(activity.getId() + "#comment-" + replyToCommentActivity.getId()));
+      String notificationLink = CommonsUtils.getCurrentDomain() + LinkProvider.getSingleActivityUrl(activity.getId() + "#comment-" + replyToCommentActivity.getId());
+      templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", notificationLink);
 
       //
       String body = TemplateUtils.processGroovy(templateContext);
       //binding the exception throws by processing template
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
-      return messageInfo.body(body).end();
+      return messageInfo.body(body).subject(notificationLink).end();
     }
 
     private String cutStringByMaxLength(String st, int maxLength) {
@@ -401,21 +403,23 @@ public class PushTemplateProvider extends TemplateProvider {
 
       // In case of mention on a comment, we need provide the id of the activity, not of the comment
       String activityTitle = getActivityTitle(activity);
+      String activityLink;
       if (activity.isComment()) {
         ExoSocialActivity parentActivity = Utils.getActivityManager().getParentActivity(activity);
         activityTitle = getActivityTitle(parentActivity);
         activityId = parentActivity.getId();
-        templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", LinkProvider.getSingleActivityUrl(activityId + "#comment-" + activity.getId()));
+        activityLink = CommonsUtils.getCurrentDomain() + LinkProvider.getSingleActivityUrl(activityId + "#comment-" + activity.getId());
       } else {
-        templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", LinkProvider.getSingleActivityUrl(activityId));
+        activityLink = CommonsUtils.getCurrentDomain() + LinkProvider.getSingleActivityUrl(activityId);
       }
+      templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", activityLink);
       templateContext.put("ACTIVITY", NotificationUtils.getNotificationActivityTitle(activityTitle, activity.getType()));
       //
       String body = TemplateUtils.processGroovy(templateContext);
       //binding the exception throws by processing template
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
-      return messageInfo.body(body).end();
+      return messageInfo.body(body).subject(activityLink).end();
     }
 
     @Override
@@ -462,17 +466,20 @@ public class PushTemplateProvider extends TemplateProvider {
       templateContext.put("ACTIVITY", NotificationUtils.getNotificationActivityTitle(getActivityTitle(activity), activity.getType()));
       templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", LinkProvider.getSingleActivityUrl(activity.getId()));
 
+      String notificationLink;
       if(activity.isComment()) {
         ExoSocialActivity activityOfComment = Utils.getActivityManager().getParentActivity(activity);
-        templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", LinkProvider.getSingleActivityUrl(activityOfComment.getId() + "#comment-" + activity.getId()));
+        notificationLink = CommonsUtils.getCurrentDomain() + LinkProvider.getSingleActivityUrl(activityOfComment.getId() + "#comment-" + activity.getId());
+
       } else {
-        templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", LinkProvider.getSingleActivityUrl(activity.getId()));
+        notificationLink = CommonsUtils.getCurrentDomain() + LinkProvider.getSingleActivityUrl(activity.getId());
       }
+      templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", notificationLink);
       List<String> users = SocialNotificationUtils.mergeUsers(notification, SocialNotificationUtils.LIKER.getKey(), activity.getId(), notification.getValueOwnerParameter(SocialNotificationUtils.LIKER.getKey()));
       //
       int nbUsers = users.size();
       if (nbUsers > 0) {
-        Identity lastIdentity = Utils.getIdentityManager().getOrCreateIdentity(OrganizationIdentityProvider.NAME, users.get(nbUsers - 1), true);
+        Identity lastIdentity = Utils.getIdentityManager().getOrCreateIdentity(OrganizationIdentityProvider.NAME, users.get(nbUsers - 1));
         Profile profile = lastIdentity.getProfile();
         templateContext.put("USER", Utils.addExternalFlag(lastIdentity));
         templateContext.put("AVATAR", profile.getAvatarUrl() != null ? profile.getAvatarUrl() : LinkProvider.PROFILE_DEFAULT_AVATAR_URL);
@@ -480,7 +487,7 @@ public class PushTemplateProvider extends TemplateProvider {
         templateContext.put("NB_USERS", nbUsers);
         //
         if (nbUsers >= 2) {
-          Identity beforeLastIdentity = Utils.getIdentityManager().getOrCreateIdentity(OrganizationIdentityProvider.NAME, users.get(nbUsers - 2), true);
+          Identity beforeLastIdentity = Utils.getIdentityManager().getOrCreateIdentity(OrganizationIdentityProvider.NAME, users.get(nbUsers - 2));
           templateContext.put("LAST_USER", Utils.addExternalFlag(beforeLastIdentity));
           if (nbUsers > 2) {
             templateContext.put("COUNT", nbUsers - 2);
@@ -493,7 +500,7 @@ public class PushTemplateProvider extends TemplateProvider {
       //binding the exception throws by processing template
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
-      return messageInfo.body(body).end();
+      return messageInfo.body(body).subject(notificationLink).end();
     }
 
     @Override
@@ -523,14 +530,15 @@ public class PushTemplateProvider extends TemplateProvider {
       templateContext.put("LAST_UPDATED_TIME", TimeConvertUtils.convertXTimeAgoByTimeServer(cal.getTime(), "EE, dd yyyy", new Locale(language), TimeConvertUtils.YEAR));
       templateContext.put("USER", Utils.addExternalFlag(identity));
       templateContext.put("PORTAL_NAME", NotificationPluginUtils.getBrandingPortalName());
-      templateContext.put("PROFILE_URL", LinkProvider.getUserProfileUri(identity.getRemoteId()));
+      String profileUrl = CommonsUtils.getCurrentDomain() + LinkProvider.getUserProfileUri(identity.getRemoteId());
+      templateContext.put("PROFILE_URL", profileUrl);
       templateContext.put("AVATAR", userProfile.getAvatarUrl() != null ? userProfile.getAvatarUrl() : LinkProvider.PROFILE_DEFAULT_AVATAR_URL);
       //
       String body = TemplateUtils.processGroovy(templateContext);
       //binding the exception throws by processing template
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
-      return messageInfo.body(body).end();
+      return messageInfo.body(body).subject(profileUrl).end();
     }
 
     @Override
@@ -571,13 +579,14 @@ public class PushTemplateProvider extends TemplateProvider {
       templateContext.put("ACTIVITY", NotificationUtils.getNotificationActivityTitle(getActivityTitle(activity), activity.getType()));
       templateContext.put("USER", Utils.addExternalFlag(identity));
       templateContext.put("PROFILE_URL", LinkProvider.getUserProfileUri(identity.getRemoteId()));
-      templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", LinkProvider.getSingleActivityUrl(activity.getId()));
+      String activityLink = CommonsUtils.getCurrentDomain() + LinkProvider.getSingleActivityUrl(activity.getId());
+      templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", activityLink) ;
       //
       String body = TemplateUtils.processGroovy(templateContext);
       //binding the exception throws by processing template
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
-      return messageInfo.body(body).end();
+      return messageInfo.body(body).subject(activityLink).end();
     }
 
     @Override
@@ -625,13 +634,14 @@ public class PushTemplateProvider extends TemplateProvider {
       templateContext.put("SPACE", space.getDisplayName());
       templateContext.put("SPACE_URL", LinkProvider.getActivityUriForSpace(space.getPrettyName(), space.getGroupId().replace("/spaces/", "")));
       templateContext.put("PROFILE_URL", LinkProvider.getUserProfileUri(identity.getRemoteId()));
-      templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", LinkProvider.getSingleActivityUrl(activity.getId()));
+      String activityLink = CommonsUtils.getCurrentDomain() + LinkProvider.getSingleActivityUrl(activity.getId());
+      templateContext.put("VIEW_FULL_DISCUSSION_ACTION_URL", activityLink);
       //
       String body = TemplateUtils.processGroovy(templateContext);
       //binding the exception throws by processing template
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
-      return messageInfo.body(body).end();
+      return messageInfo.body(body).subject(activityLink).end();
     }
 
     @Override
@@ -663,7 +673,8 @@ public class PushTemplateProvider extends TemplateProvider {
       templateContext.put("STATUS", status != null && status.equals("accepted") ? "ACCEPTED" : "PENDING");
       templateContext.put("LAST_UPDATED_TIME", TimeConvertUtils.convertXTimeAgoByTimeServer(cal.getTime(), "EE, dd yyyy", new Locale(language), TimeConvertUtils.YEAR));
       templateContext.put("USER", Utils.addExternalFlag(identity));
-      templateContext.put("PROFILE_URL", LinkProvider.getUserProfileUri(identity.getRemoteId()));
+      String senderProfileUrl = CommonsUtils.getCurrentDomain() + LinkProvider.getUserProfileUri(identity.getRemoteId());
+      templateContext.put("PROFILE_URL", senderProfileUrl);
       templateContext.put("AVATAR", userProfile.getAvatarUrl() != null ? userProfile.getAvatarUrl() : LinkProvider.PROFILE_DEFAULT_AVATAR_URL);
       templateContext.put("ACCEPT_CONNECTION_REQUEST_ACTION_URL", LinkProviderUtils.getWebNotificationRestUrl(ACCEPT_INVITATION_TO_CONNECT, sender, toUser, notification.getId(), MESSAGE_JSON_FILE_NAME));
       templateContext.put("REFUSE_CONNECTION_REQUEST_ACTION_URL", LinkProviderUtils.getWebNotificationRestUrl(REFUSE_INVITATION_TO_CONNECT, sender, toUser, notification.getId(), MESSAGE_JSON_FILE_NAME));
@@ -672,7 +683,7 @@ public class PushTemplateProvider extends TemplateProvider {
       //binding the exception throws by processing template
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
-      return messageInfo.body(body).end();
+      return messageInfo.body(body).subject(senderProfileUrl).end();
     }
 
     @Override
@@ -710,7 +721,8 @@ public class PushTemplateProvider extends TemplateProvider {
       templateContext.put("LAST_UPDATED_TIME", TimeConvertUtils.convertXTimeAgoByTimeServer(cal.getTime(), "EE, dd yyyy", new Locale(language), TimeConvertUtils.YEAR));
       templateContext.put("SPACE", space.getDisplayName());
       templateContext.put("USER", Utils.addExternalFlag(identity));
-      templateContext.put("SPACE_URL", LinkProvider.getActivityUriForSpace(space.getPrettyName(), space.getGroupId().replace("/spaces/", "")));
+      String spaceUrl = CommonsUtils.getCurrentDomain() + LinkProvider.getActivityUriForSpace(space.getPrettyName(), space.getGroupId().replace("/spaces/", ""));
+      templateContext.put("SPACE_URL", spaceUrl);
       templateContext.put("AVATAR", userProfile.getAvatarUrl() != null ? userProfile.getAvatarUrl() : LinkProvider.PROFILE_DEFAULT_AVATAR_URL);
       templateContext.put("VALIDATE_SPACE_REQUEST_ACTION_URL", LinkProviderUtils.getWebNotificationRestUrl(VALIDATE_SPACE_REQUEST, space.getId(), identity.getRemoteId()) + "/" + notification.getTo() + "/" + notification.getId() + "/" + MESSAGE_JSON_FILE_NAME);
       templateContext.put("REFUSE_SPACE_REQUEST_ACTION_URL", LinkProviderUtils.getWebNotificationRestUrl(REFUSE_SPACE_REQUEST, space.getId(), identity.getRemoteId()) + "/" + notification.getTo() + "/" + notification.getId() + "/" + MESSAGE_JSON_FILE_NAME);
@@ -719,7 +731,7 @@ public class PushTemplateProvider extends TemplateProvider {
       //binding the exception throws by processing template
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
-      return messageInfo.body(body).end();
+      return messageInfo.body(body).subject(spaceUrl).end();
     }
 
     @Override
@@ -756,7 +768,8 @@ public class PushTemplateProvider extends TemplateProvider {
       templateContext.put("LAST_UPDATED_TIME", TimeConvertUtils.convertXTimeAgoByTimeServer(cal.getTime(), "EE, dd yyyy", new Locale(language), TimeConvertUtils.YEAR));
       templateContext.put("SPACE", space.getDisplayName());
       templateContext.put("SENDER_NAME", sender);
-      templateContext.put("SPACE_URL", LinkProvider.getActivityUriForSpace(space.getPrettyName(), space.getGroupId().replace("/spaces/", "")));
+      String spaceUrl = CommonsUtils.getCurrentDomain() + LinkProvider.getActivityUriForSpace(space.getPrettyName(), space.getGroupId().replace("/spaces/", ""));
+      templateContext.put("SPACE_URL", spaceUrl);
       templateContext.put("SPACE_AVATAR", space.getAvatarUrl() != null ? space.getAvatarUrl() : LinkProvider.SPACE_DEFAULT_AVATAR_URL);
       templateContext.put("ACCEPT_SPACE_INVITATION_ACTION_URL", LinkProviderUtils.getWebNotificationRestUrl(ACCEPT_SPACE_INVITATION, space.getId(), notification.getTo(), notification.getId(), MESSAGE_JSON_FILE_NAME));
       templateContext.put("REFUSE_SPACE_INVITATION_ACTION_URL", LinkProviderUtils.getWebNotificationRestUrl(REFUSE_SPACE_INVITATION, space.getId(), notification.getTo(), notification.getId(), MESSAGE_JSON_FILE_NAME));
@@ -765,7 +778,7 @@ public class PushTemplateProvider extends TemplateProvider {
       //binding the exception throws by processing template
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
-      return messageInfo.body(body).end();
+      return messageInfo.body(body).subject(spaceUrl).end();
     }
 
     @Override
