@@ -16,6 +16,7 @@
  */
 package org.exoplatform.push.channel;
 
+import org.apache.commons.lang.StringUtils;
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.channel.AbstractChannel;
 import org.exoplatform.commons.api.notification.channel.template.AbstractTemplateBuilder;
@@ -94,6 +95,11 @@ public class PushChannel extends AbstractChannel {
               String maskedToken = StringUtil.mask(device.getToken(), 4);
               LOG.info("Sending push notification to user {} (token={})",
                       userId, maskedToken);
+              if(StringUtils.isBlank(messageInfo.getSubject())) {
+                if(LOG.isDebugEnabled()) {
+                  LOG.warn("No URL provided for notification type {}", messageInfo.getPluginId());
+                }
+              }
               Message message = new Message(userId, device.getToken(), device.getType(), brandingService.getCompanyName(), messageInfo.getBody(), messageInfo.getSubject());
               messagePublisher.send(message);
               long sendMessageExecutionTime = System.currentTimeMillis() - startTimeSendingMessage;
