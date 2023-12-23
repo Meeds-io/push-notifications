@@ -18,7 +18,7 @@ package org.exoplatform.push.domain;
 
 import org.exoplatform.commons.api.persistence.ExoEntity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity(name = "PushNotifsDevice")
