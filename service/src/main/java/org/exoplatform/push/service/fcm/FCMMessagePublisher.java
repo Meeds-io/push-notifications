@@ -24,7 +24,7 @@ import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.client.util.ArrayMap;
 import com.google.api.client.util.PemReader;
 import com.google.api.client.util.SecurityUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
