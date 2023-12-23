@@ -16,7 +16,7 @@
  */
 package org.exoplatform.push.service.fcm;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;

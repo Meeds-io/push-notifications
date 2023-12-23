@@ -21,8 +21,9 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+
 import org.exoplatform.commons.api.notification.NotificationContext;
 import org.exoplatform.commons.api.notification.NotificationMessageUtils;
 import org.exoplatform.commons.api.notification.annotation.TemplateConfig;
@@ -187,7 +188,7 @@ public class PushTemplateProvider extends TemplateProvider {
 
     private String cutStringByMaxLength(String st, int maxLength) {
       if (st == null) return st;
-      st = StringEscapeUtils.unescapeHtml(st);
+      st = StringEscapeUtils.unescapeHtml4(st);
       if (st.length() <= maxLength) return st;
       String noHtmlSt = st.replaceAll("\\<.*?\\>", "");
       if (noHtmlSt.length() <= maxLength) return noHtmlSt;
@@ -360,7 +361,7 @@ public class PushTemplateProvider extends TemplateProvider {
 
     private String cutStringByMaxLength(String st, int maxLength) {
       if (st == null) return st;
-      st = StringEscapeUtils.unescapeHtml(st);
+      st = StringEscapeUtils.unescapeHtml4(st);
       if (st.length() <= maxLength) return st;
       String noHtmlSt = st.replaceAll("\\<.*?\\>", "");
       if (noHtmlSt.length() <= maxLength) return noHtmlSt;
