@@ -62,6 +62,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <changeSet author="push-notifications" id="1.0.0-3" dbms="oracle,postgresql">
         <createSequence sequenceName="SEQ_MSG_DEVICES_ID" startValue="1"/>
     </changeSet>
+    <changeSet author="push-notifications" id="1.0.0-4" dbms="hsqldb">
+        <createSequence sequenceName="SEQ_MSG_DEVICES_ID" startValue="1"/>
+    </changeSet>
 
 
 
