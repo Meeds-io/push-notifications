@@ -18,7 +18,7 @@ package org.exoplatform.push.domain;
 
 import org.exoplatform.commons.api.persistence.ExoEntity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity(name = "PushNotifsDevice")
@@ -42,7 +42,7 @@ import java.util.Date;
 public class Device {
 
   @Id
-  @SequenceGenerator(name="SEQ_MSG_DEVICES_ID", sequenceName="SEQ_MSG_DEVICES_ID")
+  @SequenceGenerator(name="SEQ_MSG_DEVICES_ID", sequenceName="SEQ_MSG_DEVICES_ID", allocationSize = 1)
   @GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_MSG_DEVICES_ID")
   @Column(name = "ID")
   private long id;
