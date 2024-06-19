@@ -24,12 +24,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <groupId>org.exoplatform.addons</groupId>
         <version>18-M03</version>
     </parent>
-    <groupId>org.exoplatform.addons.push-notifications</groupId>
+    <groupId>io.meeds.addons.push-notifications</groupId>
     <artifactId>exo-push-notifications</artifactId>
     <version>7.0.x-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>eXo Add-on:: eXo Push notifications addon</name>
-    <description>eXo Push notifications addon</description>
+    <name>Meeds:: Add-on:: eXo Push notifications addon</name>
+    <description>Meeds Push notifications addon</description>
     <modules>
         <module>war</module>
         <module>packaging</module>
@@ -46,7 +46,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <!-- **************************************** -->
         <!-- Dependencies versions -->
         <!-- **************************************** -->
-        <org.exoplatform.social.version>7.0.x-SNAPSHOT</org.exoplatform.social.version>
+        <io.meeds.social.version>7.0.x-SNAPSHOT</io.meeds.social.version>
         
         <!-- Sonar properties -->
         <sonar.organization>meeds-io</sonar.organization>
@@ -55,21 +55,21 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <dependencies>
             <!-- Import versions from platform project -->
             <dependency>
-                <groupId>org.exoplatform.social</groupId>
+                <groupId>io.meeds.social</groupId>
                 <artifactId>social</artifactId>
-                <version>${org.exoplatform.social.version}</version>
+                <version>${io.meeds.social.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <!-- Declare our own artifacts -->
             <dependency>
-                <groupId>org.exoplatform.addons.push-notifications</groupId>
+                <groupId>io.meeds.addons.push-notifications</groupId>
                 <artifactId>exo-push-notifications-service</artifactId>
                 <version>${project.version}</version>
                 <type>jar</type>
             </dependency>
             <dependency>
-                <groupId>org.exoplatform.addons.push-notifications</groupId>
+                <groupId>io.meeds.addons.push-notifications</groupId>
                 <artifactId>exo-push-notifications-webapp</artifactId>
                 <version>${project.version}</version>
                 <type>war</type>
