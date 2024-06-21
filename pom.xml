@@ -24,7 +24,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <groupId>org.exoplatform.addons</groupId>
         <version>18-M03</version>
     </parent>
-    <groupId>io.meeds.addons.push-notifications</groupId>
+    <groupId>io.meeds.push-notifications</groupId>
     <artifactId>exo-push-notifications</artifactId>
     <version>7.0.x-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -63,18 +63,23 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </dependency>
             <!-- Declare our own artifacts -->
             <dependency>
-                <groupId>io.meeds.addons.push-notifications</groupId>
-                <artifactId>exo-push-notifications-service</artifactId>
-                <version>${project.version}</version>
-                <type>jar</type>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>exo-push-notifications-service</artifactId>
+              <version>${project.version}</version>
+              <type>jar</type>
             </dependency>
             <dependency>
-                <groupId>io.meeds.addons.push-notifications</groupId>
-                <artifactId>exo-push-notifications-webapp</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>exo-push-notifications-webapp</artifactId>
+              <version>${project.version}</version>
+              <type>war</type>
             </dependency>
-
+            <dependency>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>exo-push-notifications-addon-packaging</artifactId>
+              <version>${project.version}</version>
+              <type>zip</type>
+            </dependency>
         </dependencies>
     </dependencyManagement>
       <!-- This profile is used to allow github action to build branches. The github action is used for sonar analysis -->
