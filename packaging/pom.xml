@@ -20,27 +20,27 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>io.meeds.push-notifications</groupId>
-    <artifactId>exo-push-notifications</artifactId>
+    <artifactId>push-notifications</artifactId>
     <version>7.0.x-SNAPSHOT</version>
   </parent>
-  <artifactId>exo-push-notifications-addon-packaging</artifactId>
+  <artifactId>push-notifications-addon-packaging</artifactId>
   <name>Meeds:: Push notifications addon - Packaging</name>
   <packaging>pom</packaging>
   <description>Meeds Push notifications addon packaging</description>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>exo-push-notifications-webapp</artifactId>
+      <artifactId>push-notifications-webapp</artifactId>
       <type>war</type>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>exo-push-notifications-service</artifactId>
+      <artifactId>push-notifications-service</artifactId>
       <type>jar</type>
     </dependency>
   </dependencies>
   <build>
-    <finalName>${project.artifactId}-${project.version}</finalName>
+    <finalName>${project.artifactId}</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

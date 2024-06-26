@@ -20,10 +20,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>io.meeds.push-notifications</groupId>
-    <artifactId>exo-push-notifications</artifactId>
+    <artifactId>push-notifications</artifactId>
     <version>7.0.x-SNAPSHOT</version>
   </parent>
-  <artifactId>exo-push-notifications-webapp</artifactId>
+  <artifactId>push-notifications-webapp</artifactId>
 
   <packaging>war</packaging>
   <name>Meeds:: Push notifications addon - Webapp</name>

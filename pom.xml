@@ -25,10 +25,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <version>18-M04</version>
     </parent>
     <groupId>io.meeds.push-notifications</groupId>
-    <artifactId>exo-push-notifications</artifactId>
+    <artifactId>push-notifications</artifactId>
     <version>7.0.x-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Meeds:: Add-on:: eXo Push notifications addon</name>
+    <name>Meeds:: Add-on:: Push notifications addon</name>
     <description>Meeds Push notifications addon</description>
     <modules>
         <module>war</module>
@@ -36,10 +36,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <module>service</module>
     </modules>
     <scm>
-        <connection>scm:git:git://github.com/exoplatform/push-notifications.git</connection>
-        <developerConnection>scm:git:git@github.com:exoplatform/push-notifications.git</developerConnection>
+        <connection>scm:git:git://github.com/meeds-io/push-notifications.git</connection>
+        <developerConnection>scm:git:git@github.com:meeds-io/push-notifications.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://github.com/exoplatform/push-notifications</url>
+        <url>https://github.com/meeds-io/push-notifications</url>
     </scm>
 
     <properties>
@@ -64,19 +64,19 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             <!-- Declare our own artifacts -->
             <dependency>
               <groupId>${project.groupId}</groupId>
-              <artifactId>exo-push-notifications-service</artifactId>
+              <artifactId>push-notifications-service</artifactId>
               <version>${project.version}</version>
               <type>jar</type>
             </dependency>
             <dependency>
               <groupId>${project.groupId}</groupId>
-              <artifactId>exo-push-notifications-webapp</artifactId>
+              <artifactId>push-notifications-webapp</artifactId>
               <version>${project.version}</version>
               <type>war</type>
             </dependency>
             <dependency>
               <groupId>${project.groupId}</groupId>
-              <artifactId>exo-push-notifications-addon-packaging</artifactId>
+              <artifactId>push-notifications-addon-packaging</artifactId>
               <version>${project.version}</version>
               <type>zip</type>
             </dependency>
