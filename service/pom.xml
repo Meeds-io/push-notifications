@@ -19,12 +19,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.exoplatform.addons.push-notifications</groupId>
-        <artifactId>exo-push-notifications</artifactId>
+        <groupId>io.meeds.push-notifications</groupId>
+        <artifactId>push-notifications</artifactId>
         <version>7.0.x-exo-SNAPSHOT</version>
     </parent>
-    <artifactId>exo-push-notifications-service</artifactId>
-    <name>eXo Push notifications addon - Service</name>
+    <artifactId>push-notifications-service</artifactId>
+    <name>Meeds:: Push notifications addon - Service</name>
 
     <properties>
         <exo.test.coverage.ratio>0.35</exo.test.coverage.ratio>
@@ -32,18 +32,19 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
     <dependencies>
       <dependency>
-        <groupId>org.exoplatform.social</groupId>
+        <groupId>io.meeds.social</groupId>
         <artifactId>social-component-notification</artifactId>
         <scope>provided</scope>
       </dependency>
       <dependency>
-        <groupId>org.exoplatform.social</groupId>
+        <groupId>io.meeds.social</groupId>
         <artifactId>social-component-oauth-auth</artifactId>
         <scope>provided</scope>
       </dependency>
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>com.jcabi</groupId>
@@ -62,7 +63,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                             <host>localhost:8080</host>
                             <basePath>/rest</basePath>
                             <info>
-                                <title>eXo Push Notifications REST API</title>
+                                <title>Meeds Push Notifications REST API</title>
                                 <version>1</version>
                                 <description>The Push Notifications REST API provides methods for managing devices for Push Notifications. Here are the descriptions of a full representation of each of the Push Notifications resources available.</description>
                             </info>
