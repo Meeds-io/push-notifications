@@ -19,28 +19,28 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.exoplatform.addons.push-notifications</groupId>
-    <artifactId>exo-push-notifications</artifactId>
+    <groupId>io.meeds.push-notifications</groupId>
+    <artifactId>push-notifications</artifactId>
     <version>7.0.x-SNAPSHOT</version>
   </parent>
-  <artifactId>exo-push-notifications-addon-packaging</artifactId>
-  <name>eXo Push notifications addon - Packaging</name>
+  <artifactId>push-notifications-packaging</artifactId>
+  <name>Meeds:: Push notifications addon - Packaging</name>
   <packaging>pom</packaging>
-  <description>eXo Push notifications addon packaging</description>
+  <description>Meeds Push notifications addon packaging</description>
   <dependencies>
     <dependency>
-      <groupId>org.exoplatform.addons.push-notifications</groupId>
-      <artifactId>exo-push-notifications-webapp</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>push-notifications-webapp</artifactId>
       <type>war</type>
     </dependency>
     <dependency>
-      <groupId>org.exoplatform.addons.push-notifications</groupId>
-      <artifactId>exo-push-notifications-service</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>push-notifications-service</artifactId>
       <type>jar</type>
     </dependency>
   </dependencies>
   <build>
-    <finalName>${project.artifactId}-${project.version}</finalName>
+    <finalName>${project.artifactId}</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

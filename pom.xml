@@ -21,32 +21,32 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>addons-parent-pom</artifactId>
-        <groupId>org.exoplatform.addons</groupId>
-        <version>18-M03</version>
+        <groupId>io.meeds.addons</groupId>
+        <version>18-M04</version>
     </parent>
-    <groupId>org.exoplatform.addons.push-notifications</groupId>
-    <artifactId>exo-push-notifications</artifactId>
+    <groupId>io.meeds.push-notifications</groupId>
+    <artifactId>push-notifications</artifactId>
     <version>7.0.x-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>eXo Add-on:: eXo Push notifications addon</name>
-    <description>eXo Push notifications addon</description>
+    <name>Meeds:: Add-on:: Push notifications addon</name>
+    <description>Meeds Push notifications addon</description>
     <modules>
         <module>war</module>
         <module>packaging</module>
         <module>service</module>
     </modules>
     <scm>
-        <connection>scm:git:git://github.com/exoplatform/push-notifications.git</connection>
-        <developerConnection>scm:git:git@github.com:exoplatform/push-notifications.git</developerConnection>
+        <connection>scm:git:git://github.com/meeds-io/push-notifications.git</connection>
+        <developerConnection>scm:git:git@github.com:meeds-io/push-notifications.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://github.com/exoplatform/push-notifications</url>
+        <url>https://github.com/meeds-io/push-notifications</url>
     </scm>
 
     <properties>
         <!-- **************************************** -->
         <!-- Dependencies versions -->
         <!-- **************************************** -->
-        <org.exoplatform.social.version>7.0.x-SNAPSHOT</org.exoplatform.social.version>
+        <io.meeds.social.version>7.0.x-SNAPSHOT</io.meeds.social.version>
         
         <!-- Sonar properties -->
         <sonar.organization>meeds-io</sonar.organization>
@@ -55,26 +55,31 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         <dependencies>
             <!-- Import versions from platform project -->
             <dependency>
-                <groupId>org.exoplatform.social</groupId>
+                <groupId>io.meeds.social</groupId>
                 <artifactId>social</artifactId>
-                <version>${org.exoplatform.social.version}</version>
+                <version>${io.meeds.social.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <!-- Declare our own artifacts -->
             <dependency>
-                <groupId>org.exoplatform.addons.push-notifications</groupId>
-                <artifactId>exo-push-notifications-service</artifactId>
-                <version>${project.version}</version>
-                <type>jar</type>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>push-notifications-service</artifactId>
+              <version>${project.version}</version>
+              <type>jar</type>
             </dependency>
             <dependency>
-                <groupId>org.exoplatform.addons.push-notifications</groupId>
-                <artifactId>exo-push-notifications-webapp</artifactId>
-                <version>${project.version}</version>
-                <type>war</type>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>push-notifications-webapp</artifactId>
+              <version>${project.version}</version>
+              <type>war</type>
             </dependency>
-
+            <dependency>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>push-notifications-packaging</artifactId>
+              <version>${project.version}</version>
+              <type>zip</type>
+            </dependency>
         </dependencies>
     </dependencyManagement>
       <!-- This profile is used to allow github action to build branches. The github action is used for sonar analysis -->
