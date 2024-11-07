@@ -33,17 +33,19 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
     <!-- Definition of MSG_DEVICES table -->
     <changeSet author="push-notifications" id="1.0.0-1">
+        <validCheckSum>9:d8b93b8958add435081f72f023a0ccfb</validCheckSum>
+        <validCheckSum>9:b2e263d54f554c78747d2435d05de181</validCheckSum>
         <createTable tableName="MSG_DEVICES">
             <column name="ID" type="BIGINT" autoIncrement="${autoIncrement}" startWith="1">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="PK_MSG_DEVICES" />
             </column>
-            <column name="TOKEN" type="NVARCHAR(200)">
+            <column name="TOKEN" type="VARCHAR(200)">
                 <constraints nullable="false"/>
             </column>
-            <column name="USERNAME" type="NVARCHAR(200)">
+            <column name="USERNAME" type="VARCHAR(200)">
                 <constraints nullable="false"/>
             </column>
-            <column name="TYPE" type="NVARCHAR(200)">
+            <column name="TYPE" type="VARCHAR(200)">
                 <constraints nullable="true"/>
             </column>
             <column name="REGISTRATION_DATE" type="TIMESTAMP" defaultValueComputed="${now}">
@@ -51,7 +53,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
             </column>
         </createTable>
         <modifySql dbms="mysql">
-            <append value=" ENGINE=INNODB CHARSET=UTF8 COLLATE utf8_general_ci"/>
+            <append value=" ENGINE=INNODB CHARSET=UTF8MB4 COLLATE utf8mb4_0900_ai_ci"/>
         </modifySql>
     </changeSet>
     <changeSet author="push-notifications" id="1.0.0-2">
@@ -64,6 +66,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </changeSet>
     <changeSet author="push-notifications" id="1.0.0-4" dbms="hsqldb">
         <createSequence sequenceName="SEQ_MSG_DEVICES_ID" startValue="1"/>
+    </changeSet>
+    <changeSet author="push-notifications" id="1.0.0-5">
+        <sql dbms="mysql">
+            ALTER TABLE MSG_DEVICES CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+        </sql>
     </changeSet>
 
 
