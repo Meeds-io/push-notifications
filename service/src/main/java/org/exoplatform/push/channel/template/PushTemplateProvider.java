@@ -39,6 +39,7 @@ import org.exoplatform.commons.api.notification.service.template.TemplateContext
 import org.exoplatform.commons.notification.NotificationUtils;
 import org.exoplatform.commons.notification.template.TemplateUtils;
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.commons.utils.TimeConvertUtils;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -63,7 +64,6 @@ import org.exoplatform.social.notification.plugin.RelationshipReceivedRequestPlu
 import org.exoplatform.social.notification.plugin.RequestJoinSpacePlugin;
 import org.exoplatform.social.notification.plugin.SocialNotificationUtils;
 import org.exoplatform.social.notification.plugin.SpaceInvitationPlugin;
-import org.exoplatform.webui.utils.TimeConvertUtils;
 
 /**
  * Templates for Push Notifications.
