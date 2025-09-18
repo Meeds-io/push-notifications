@@ -47,7 +47,7 @@
         <!-- **************************************** -->
         <!-- Dependencies versions -->
         <!-- **************************************** -->
-        <io.meeds.social.version>7.1.x-exo-SNAPSHOT</io.meeds.social.version>
+        <io.meeds.social.version>7.1.0-exo-20250918</io.meeds.social.version>
         
         <!-- Sonar properties -->
         <sonar.organization>meeds-io</sonar.organization>
