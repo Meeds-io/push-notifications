@@ -22,7 +22,7 @@
     <parent>
         <groupId>io.meeds.push-notifications</groupId>
         <artifactId>push-notifications</artifactId>
-        <version>7.2.x-exo-SNAPSHOT</version>
+        <version>7.2.0-exo-20260329</version>
     </parent>
     <artifactId>push-notifications-service</artifactId>
     <name>Meeds:: Push notifications addon - Service</name>
