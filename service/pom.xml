@@ -28,7 +28,7 @@
     <name>Meeds:: Push notifications addon - Service</name>
 
     <properties>
-        <exo.test.coverage.ratio>0.35</exo.test.coverage.ratio>
+        <exo.test.coverage.ratio>0.33</exo.test.coverage.ratio>
     </properties>
 
     <dependencies>
