@@ -47,7 +47,7 @@ import org.exoplatform.container.xml.ValueParam;
 import org.exoplatform.push.domain.Message;
 import org.exoplatform.push.exception.InvalidTokenException;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FCMMessagePublisherTest {

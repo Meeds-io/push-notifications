@@ -18,34 +18,33 @@
  */
 package org.exoplatform.push.domain;
 
-import org.exoplatform.commons.api.persistence.ExoEntity;
-
-import jakarta.persistence.*;
 import java.util.Date;
 
-@Entity(name = "PushNotifsDevice")
-@ExoEntity
-@Table(name = "MSG_DEVICES")
-@NamedQueries({
-  @NamedQuery(
-    name = "PushNotifsDevice.findDevicesByUsername",
-    query = "SELECT d FROM PushNotifsDevice d WHERE d.username = :username"
-  ),
-  @NamedQuery(
-    name = "PushNotifsDevice.findDevicesByToken",
-    query = "SELECT d FROM PushNotifsDevice d WHERE d.token = :token"
-  ),
-  @NamedQuery(
-    name = "PushNotifsDevice.deleteDevicesWithTokenOlderThan",
-    query = "DELETE FROM PushNotifsDevice d WHERE d.registrationDate < :expirationDate"
-  )
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.NamedQuery;
+import io.meeds.common.persistence.PortableSequence;
+import jakarta.persistence.Table;
 
-})
+@Entity(name = "PushNotifsDevice")
+@Table(name = "MSG_DEVICES")
+@NamedQuery(
+  name = "PushNotifsDevice.findDevicesByUsername",
+  query = "SELECT d FROM PushNotifsDevice d WHERE d.username = :username"
+)
+@NamedQuery(
+  name = "PushNotifsDevice.findDevicesByToken",
+  query = "SELECT d FROM PushNotifsDevice d WHERE d.token = :token"
+)
+@NamedQuery(
+  name = "PushNotifsDevice.deleteDevicesWithTokenOlderThan",
+  query = "DELETE FROM PushNotifsDevice d WHERE d.registrationDate < :expirationDate"
+)
 public class Device {
 
   @Id
-  @SequenceGenerator(name="SEQ_MSG_DEVICES_ID", sequenceName="SEQ_MSG_DEVICES_ID", allocationSize = 1)
-  @GeneratedValue(strategy=GenerationType.AUTO, generator="SEQ_MSG_DEVICES_ID")
+  @PortableSequence(name = "SEQ_MSG_DEVICES_ID")
   @Column(name = "ID")
   private long id;
 
