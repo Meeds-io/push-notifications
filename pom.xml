@@ -23,7 +23,7 @@
     <parent>
         <artifactId>addons-parent-pom</artifactId>
         <groupId>io.meeds.addons</groupId>
-        <version>20-RC01</version>
+        <version>20</version>
     </parent>
     <groupId>io.meeds.push-notifications</groupId>
     <artifactId>push-notifications</artifactId>
