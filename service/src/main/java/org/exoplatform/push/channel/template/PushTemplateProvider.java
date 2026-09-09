@@ -18,7 +18,6 @@
  */
 package org.exoplatform.push.channel.template;
 
-import java.io.Writer;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -196,11 +195,6 @@ public class PushTemplateProvider extends TemplateProvider {
       if (noHtmlSt.length() <= maxLength) return noHtmlSt;
       return noHtmlSt.substring(0, maxLength) + "...";
     }
-
-    @Override
-    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-      return false;
-    }
   };
 
   /** Defines the template builder for ActivityReplyToCommentPlugin*/
@@ -369,11 +363,6 @@ public class PushTemplateProvider extends TemplateProvider {
       if (noHtmlSt.length() <= maxLength) return noHtmlSt;
       return noHtmlSt.substring(0, maxLength) + "...";
     }
-
-    @Override
-    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-      return false;
-    }
   };
 
   /** Defines the template builder for ActivityMentionPlugin*/
@@ -423,11 +412,6 @@ public class PushTemplateProvider extends TemplateProvider {
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
       return messageInfo.body(body).subject(activityLink).end();
-    }
-
-    @Override
-    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-      return false;
     }
   };
 
@@ -505,11 +489,6 @@ public class PushTemplateProvider extends TemplateProvider {
       MessageInfo messageInfo = new MessageInfo();
       return messageInfo.body(body).subject(notificationLink).end();
     }
-
-    @Override
-    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-      return false;
-    }
   }
 
   /** Defines the template builder for NewUserPlugin*/
@@ -542,11 +521,6 @@ public class PushTemplateProvider extends TemplateProvider {
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
       return messageInfo.body(body).subject(profileUrl).end();
-    }
-
-    @Override
-    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-      return false;
     }
 
   };
@@ -590,11 +564,6 @@ public class PushTemplateProvider extends TemplateProvider {
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
       return messageInfo.body(body).subject(activityLink).end();
-    }
-
-    @Override
-    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-      return false;
     }
   };
 
@@ -646,11 +615,6 @@ public class PushTemplateProvider extends TemplateProvider {
       MessageInfo messageInfo = new MessageInfo();
       return messageInfo.body(body).subject(activityLink).end();
     }
-
-    @Override
-    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-      return false;
-    }
   };
 
 
@@ -687,11 +651,6 @@ public class PushTemplateProvider extends TemplateProvider {
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
       return messageInfo.body(body).subject(senderProfileUrl).end();
-    }
-
-    @Override
-    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-      return false;
     }
 
   };
@@ -736,11 +695,6 @@ public class PushTemplateProvider extends TemplateProvider {
       MessageInfo messageInfo = new MessageInfo();
       return messageInfo.body(body).subject(spaceUrl).end();
     }
-
-    @Override
-    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-      return false;
-    }
   };
 
   /** Defines the template builder for SpaceInvitationPlugin*/
@@ -782,11 +736,6 @@ public class PushTemplateProvider extends TemplateProvider {
       ctx.setException(templateContext.getException());
       MessageInfo messageInfo = new MessageInfo();
       return messageInfo.body(body).subject(spaceUrl).end();
-    }
-
-    @Override
-    protected boolean makeDigest(NotificationContext ctx, Writer writer) {
-      return false;
     }
 
   };
