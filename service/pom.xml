@@ -46,39 +46,5 @@
 
     <build>
         <finalName>${project.artifactId}</finalName>
-        <plugins>
-            <plugin>
-                <groupId>com.github.kongchen</groupId>
-                <artifactId>swagger-maven-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <apiSources>
-                        <apiSource>
-                            <springmvc>false</springmvc>
-                            <locations>org.exoplatform.push.rest</locations>
-                            <schemes>http,https</schemes>
-                            <host>localhost:8080</host>
-                            <basePath>/rest</basePath>
-                            <info>
-                                <title>Meeds Push Notifications REST API</title>
-                                <version>1</version>
-                                <description>The Push Notifications REST API provides methods for managing devices for Push Notifications. Here are the descriptions of a full representation of each of the Push Notifications resources available.</description>
-                            </info>
-                            <templatePath>${basedir}/src/main/resources/swagger-doc-template/strapdown.html.hbs</templatePath>
-                            <outputPath>${basedir}/target/generated/document.html</outputPath>
-                            <swaggerDirectory>${basedir}/target/generated-sources/annotations/generated</swaggerDirectory>
-                        </apiSource>
-                    </apiSources>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 </project>
