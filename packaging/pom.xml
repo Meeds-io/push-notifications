@@ -28,6 +28,10 @@
   <name>Meeds:: Push notifications addon - Packaging</name>
   <packaging>pom</packaging>
   <description>Meeds Push notifications addon packaging</description>
+  <properties>
+    <!-- Generate and publish the CycloneDX SBOM of the deliverable zip -->
+    <sbom.skip>false</sbom.skip>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
